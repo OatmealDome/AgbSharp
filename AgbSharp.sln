@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgbSharp.Core", "AgbSharp.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgbSharp.Gui", "AgbSharp.Gui\AgbSharp.Gui.csproj", "{E5B2D686-079C-43CD-A0B7-32A67479F7D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgbSharp.Core.Tests", "AgbSharp.Core.Tests\AgbSharp.Core.Tests.csproj", "{886D54D1-E9FB-43A0-99EB-A6658B4744DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{E5B2D686-079C-43CD-A0B7-32A67479F7D7}.Release|x64.Build.0 = Release|Any CPU
 		{E5B2D686-079C-43CD-A0B7-32A67479F7D7}.Release|x86.ActiveCfg = Release|Any CPU
 		{E5B2D686-079C-43CD-A0B7-32A67479F7D7}.Release|x86.Build.0 = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|x64.Build.0 = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Debug|x86.Build.0 = Debug|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|x64.ActiveCfg = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|x64.Build.0 = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|x86.ActiveCfg = Release|Any CPU
+		{886D54D1-E9FB-43A0-99EB-A6658B4744DF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
