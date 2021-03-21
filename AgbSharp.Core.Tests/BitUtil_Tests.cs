@@ -20,6 +20,30 @@ namespace AgbSharp.Core.Tests
             Assert.Equal(0, BitUtil.GetBit(~source, bit));
         }
 
+        [Fact]
+        public void GetBitRange_GetTwoBitsAt26And27_EqualExpected()
+        {
+            uint i = 0x0C000000;
+
+            Assert.Equal(0x3, BitUtil.GetBitRange(i, 26, 27));
+        }
+
+        [Fact]
+        public void GetBitRange_GetFourBitsAtMsb_EqualExpected()
+        {
+            uint i = 0xF0000000;
+
+            Assert.Equal(0xF, BitUtil.GetBitRange(i, 28, 31));
+        }
+
+        [Fact]
+        public void GetBitRange_GetFourBitsAtLsb_EqualExpected()
+        {
+            uint i = 0xF;
+
+            Assert.Equal(0xF, BitUtil.GetBitRange(i, 0, 3));
+        }
+
         [Theory]
         [MemberData(nameof(SequentialBitSet))]
         public void IsBitSet_VersusSequentialBitSet_True(uint source, int bit)

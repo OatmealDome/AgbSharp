@@ -12,6 +12,14 @@ namespace AgbSharp.Core.Util
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetBitRange(uint b, int start, int end)
+        {
+            int mask = (1 << (end - start + 1)) - 1;
+
+            return (int)(b >> start) & mask;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsBitSet(uint b, int bit)
         {
             return GetBit(b, bit) != 0;
