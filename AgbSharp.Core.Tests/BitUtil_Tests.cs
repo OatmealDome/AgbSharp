@@ -80,6 +80,46 @@ namespace AgbSharp.Core.Tests
             Assert.Equal(~source, i);
         }
 
+        [Fact]
+        public void RotateRight_BitsAtLsb_BitsRotated()
+        {
+            uint i = BitUtil.RotateRight(0xF, 4);
+
+            Assert.Equal(0xF0000000, i);
+        }
+
+        [Fact]
+        public void RotateRight_BitsAtMsb_BitsRotated()
+        {
+            uint i = BitUtil.RotateRight(0xF0000000, 4);
+
+            Assert.Equal((uint)0x0F000000, i);
+        }
+
+        [Fact]
+        public void RotateRight_BitsAtMsbAndLsb_BitsRotated()
+        {
+            uint i = BitUtil.RotateRight(0xF000000F, 4);
+
+            Assert.Equal(0xFF000000, i);
+        }
+
+        [Fact]
+        public void RotateRight_ZeroRotation_BitsNotRotated()
+        {
+            uint i = BitUtil.RotateRight(0xF, 0);
+
+            Assert.Equal((uint)0xF, i);
+        }
+
+        [Fact]
+        public void RotateRight_MaxRotation_BitsNotRotated()
+        {
+            uint i = BitUtil.RotateRight(0xF, 32);
+
+            Assert.Equal((uint)0xF, i);
+        }
+
         public static IEnumerable<object[]> SequentialBitSet => new List<object[]>
         {
             new object[] { (uint)0b00000000000000000000000000000001, 0 },

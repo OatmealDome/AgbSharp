@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("AgbSharp.Core.Tests")]
 namespace AgbSharp.Core.Util
 {
-    internal class BitUtil
+    public class BitUtil
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBit(uint b, int bit)
@@ -44,6 +44,12 @@ namespace AgbSharp.Core.Util
             // invert 1110 0000
             // AND    1000 0000
             b &= (uint)~(1 << bit);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint RotateRight(uint b, int count) // ROR
+        {
+            return (b >> count) | (b << (32 - count));
         }
 
     }
