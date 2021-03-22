@@ -1,4 +1,5 @@
 using System;
+using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Cpu.Interpreter.Arm
 {
@@ -18,6 +19,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 return 1; // 1S
             }
 
+            int instructionType = BitUtil.GetBitRange(instruction, 26, 27);
+            switch (instructionType)
+            {
+                case 0b10: // Branch
+                    return Branch(instruction);
+            }
+            
             return 0;
         }
 
@@ -65,6 +73,21 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             InterpreterAssert("Reached unreachable code in CheckCondition");
 
             return false;
+        }
+
+        private int Branch(uint instruction)
+        {
+            uint offset = (uint)BitUtil.GetBitRange(instruction, 0, 23);
+
+            if (BitUtil.IsBitSet(instruction, 24)) // BL
+            {
+                Reg(LR) = Reg(PC);
+            }
+
+            Reg(PC) += 4;
+            Reg(PC) += 4 * offset;
+
+            return 2 + 1; // 2S + 1N
         }
 
     }
