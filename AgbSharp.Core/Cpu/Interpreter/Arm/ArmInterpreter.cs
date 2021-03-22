@@ -22,6 +22,17 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             int instructionType = BitUtil.GetBitRange(instruction, 26, 27);
             switch (instructionType)
             {
+                case 0b00: // Data Processing
+                    if (BitUtil.GetBitRange(instruction, 8, 25) == 0b010010111111111111)
+                    {
+                        return BranchExchange(instruction);
+                    }
+                    else
+                    {
+                        // TODO
+                    }
+
+                    break;
                 case 0b10: // Branch
                     return Branch(instruction);
             }
@@ -88,6 +99,29 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             Reg(PC) += 4;
             Reg(PC) += 4 * offset;
+
+            return 2 + 1; // 2S + 1N
+        }
+
+        private int BranchExchange(uint instruction)
+        {
+            int targetRegister = BitUtil.GetBitRange(instruction, 0, 3);
+
+            if (BitUtil.IsBitSet(instruction, 5)) // BLX
+            {
+                Reg(LR) = Reg(PC);
+            }
+
+            if (BitUtil.IsBitSet(instruction, 0)) // switch to Thumb
+            {
+                Reg(PC) = Reg(targetRegister) - 1;
+
+                CurrentStatus.Thumb = true;
+            }
+            else // continue in ARM
+            {
+                Reg(PC) = Reg(targetRegister);
+            }
 
             return 2 + 1; // 2S + 1N
         }
