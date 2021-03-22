@@ -25,7 +25,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 case 0b10: // Branch
                     return Branch(instruction);
             }
-            
+
+            InterpreterAssert($"Unknown instruction ({instruction:x8}");
+
             return 0;
         }
 
