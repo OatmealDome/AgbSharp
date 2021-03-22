@@ -21,9 +21,9 @@ namespace AgbSharp.Core.Cpu
         private Dictionary<CpuMode, IRegisterSet> RegisterSets;
         private Dictionary<CpuMode, ProgramStatus> SavedStatuses;
 
-        private IRegisterSet CurrentRegisterSet; // R0 to R15
-        private ProgramStatus CurrentStatus; // CPSR
-        private ProgramStatus CurrentSavedStatus; // SPSR
+        public IRegisterSet CurrentRegisterSet; // R0 to R15
+        public ProgramStatus CurrentStatus; // CPSR
+        public ProgramStatus CurrentSavedStatus; // SPSR
 
         public AgbCpu()
         {
