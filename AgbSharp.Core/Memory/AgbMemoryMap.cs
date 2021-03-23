@@ -50,7 +50,7 @@ namespace AgbSharp.Core.Memory
             }
             else
             {
-                throw new Exception($"invalid read addr {address}");
+                throw new Exception($"invalid read addr 0x{address:x8}");
             }
         }
 
@@ -62,7 +62,7 @@ namespace AgbSharp.Core.Memory
             }
             else
             {
-                throw new Exception($"invalid write addr {address}");
+                throw new Exception($"invalid write addr 0x{address:x8}");
             }
         }
         
