@@ -13,14 +13,14 @@ namespace AgbSharp.Core.Tests
             IMemoryRegion region = new InternalWramRegion();
 
             // Write direct to the region instead of through AgbMemoryMap
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_SIZE; i++)
+            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
             {
                 region.Write(i, (byte)(i & 0xFF));
             }
 
             map.RegisterRegion(region);
 
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_SIZE; i++)
+            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
             {
                 Assert.Equal(i & 0xFF, map.Read(i));
             }
