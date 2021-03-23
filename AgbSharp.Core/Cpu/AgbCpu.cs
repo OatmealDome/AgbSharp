@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Register;
 using AgbSharp.Core.Cpu.Status;
+using AgbSharp.Core.Memory;
 
 namespace AgbSharp.Core.Cpu
 {
@@ -25,7 +26,9 @@ namespace AgbSharp.Core.Cpu
         public ProgramStatus CurrentStatus; // CPSR
         public ProgramStatus CurrentSavedStatus; // SPSR
 
-        public AgbCpu()
+        public AgbMemoryMap MemoryMap;
+
+        public AgbCpu(AgbMemoryMap memoryMap)
         {
             RegisterSets = new Dictionary<CpuMode, IRegisterSet>();
 
@@ -50,6 +53,8 @@ namespace AgbSharp.Core.Cpu
             CurrentRegisterSet = RegisterSets[CpuMode.User];
             CurrentStatus = new ProgramStatus();
             CurrentSavedStatus = null;
+            
+            MemoryMap = memoryMap;
         }
 
         // Helper function
