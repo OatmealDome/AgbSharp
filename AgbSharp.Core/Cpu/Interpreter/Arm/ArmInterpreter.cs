@@ -90,7 +90,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         private int Branch(uint instruction)
         {
-            uint offset = (uint)BitUtil.GetBitRange(instruction, 0, 23);
+            int offset = BitUtil.GetBitRange(instruction, 0, 23);
+
+            if (BitUtil.IsBitSet((uint)offset, 23)) // check sign
+            {
+                // Sign extend
+                offset |= ~0x00FFFFFF;
+            }
 
             if (BitUtil.IsBitSet(instruction, 24)) // BL
             {
@@ -98,7 +104,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
 
             Reg(PC) += 4;
-            Reg(PC) += 4 * offset;
+            Reg(PC) += (uint)(4 * offset);
 
             return 2 + 1; // 2S + 1N
         }
