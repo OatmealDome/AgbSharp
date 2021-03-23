@@ -30,7 +30,7 @@ namespace AgbSharp.Core.Memory
         {
             foreach (Tuple<uint, uint> range in region.GetHandledRanges())
             {
-                for (uint i = range.Item1; i < range.Item2; i++)
+                for (uint i = range.Item1; i < range.Item1 + range.Item2; i++)
                 {
                     Map[i] = region;
                 }
