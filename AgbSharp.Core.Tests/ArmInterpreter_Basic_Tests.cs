@@ -51,7 +51,7 @@ namespace AgbSharp.Core.Tests
         {
             AgbCpu cpu = CreateAndRunCpu(new uint[]
             {
-                0xEA0003FE
+                0xEA0003FE // B #0x1000
             });
 
             Assert.Equal(InternalWramRegion.REGION_START + 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
@@ -62,7 +62,7 @@ namespace AgbSharp.Core.Tests
         {
             AgbCpu cpu = CreateAndRunCpu(new uint[]
             {
-                0xEAFFFBFE
+                0xEAFFFBFE // B #-0x1000
             });
 
             Assert.Equal(InternalWramRegion.REGION_START - 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
@@ -73,7 +73,7 @@ namespace AgbSharp.Core.Tests
         {
             AgbCpu cpu = CreateAndRunCpu(new uint[]
             {
-                0xEB0003FE
+                0xEB0003FE // BL #0x1000
             });
 
             Assert.Equal(InternalWramRegion.REGION_START + 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
@@ -85,7 +85,7 @@ namespace AgbSharp.Core.Tests
         {
             AgbCpu cpu = CreateAndRunCpu(new uint[]
             {
-                0xEBFFFBFE
+                0xEBFFFBFE // BL #-0x1000
             });
 
             Assert.Equal(InternalWramRegion.REGION_START - 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
@@ -103,7 +103,7 @@ namespace AgbSharp.Core.Tests
 
             RunCpu(cpu, new uint[]
             {
-                0xE12FFF10
+                0xE12FFF10 // BX r0
             });
 
             Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(PC));
@@ -120,7 +120,7 @@ namespace AgbSharp.Core.Tests
 
             RunCpu(cpu, new uint[]
             {
-                0xE12FFF11
+                0xE12FFF11 // BX r1
             });
 
             Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(PC));
