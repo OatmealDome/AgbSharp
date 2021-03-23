@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Register;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Cpu
 {
     public class OverrideRegisterSet_Tests
     {

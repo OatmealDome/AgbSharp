@@ -1,7 +1,7 @@
 using AgbSharp.Core.Cpu.Status;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Cpu
 {
     public class ProgramStatus_Tests
     {

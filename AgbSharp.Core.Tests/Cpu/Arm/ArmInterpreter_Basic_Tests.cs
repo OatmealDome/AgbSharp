@@ -3,7 +3,7 @@ using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Ram;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Cpu.Arm
 {
     public class ArmInterpreter_Basic_Tests
     {
