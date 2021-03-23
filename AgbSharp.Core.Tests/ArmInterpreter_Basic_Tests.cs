@@ -92,5 +92,40 @@ namespace AgbSharp.Core.Tests
             Assert.Equal(InternalWramRegion.REGION_START + 0x4, cpu.CurrentRegisterSet.GetRegister(LR));
         }
 
+        [Fact]
+        public void BranchAndExchange_BranchToRegZero_PcCorrect()
+        {
+            const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
+
+            AgbCpu cpu = CreateCpu();
+
+            cpu.CurrentRegisterSet.GetRegister(0) = targetAddress;
+
+            RunCpu(cpu, new uint[]
+            {
+                0xE12FFF10
+            });
+
+            Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(PC));
+        }
+
+        [Fact]
+        public void BranchAndExchange_BranchToRegZeroInThumb_PcCorrect()
+        {
+            const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
+
+            AgbCpu cpu = CreateCpu();
+
+            cpu.CurrentRegisterSet.GetRegister(0) = targetAddress;
+
+            RunCpu(cpu, new uint[]
+            {
+                0xE12FFF11
+            });
+
+            Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(PC));
+            Assert.True(cpu.CurrentStatus.Thumb);
+        }
+
     }
 }
