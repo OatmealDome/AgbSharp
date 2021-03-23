@@ -51,6 +51,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             switch (condition)
             {
                 case ArmInstructionCondition.Always:
+                case ArmInstructionCondition.Reserved:
                     return true;
                 case ArmInstructionCondition.Equal:
                     return CurrentStatus.Zero;
