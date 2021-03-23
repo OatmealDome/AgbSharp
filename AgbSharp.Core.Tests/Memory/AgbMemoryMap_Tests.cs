@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AgbSharp.Core.Memory;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Memory
 {
     public class AgbMemoryMap_Tests
     {

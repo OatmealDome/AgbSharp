@@ -2,25 +2,25 @@ using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Ram;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Memory
 {
-    public class InternalWramRegion_Tests
+    public class ExternalWramRegion_Tests
     {
         [Fact]
         public void Read_RegisteredRegion_ReadRangeSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new InternalWramRegion();
+            IMemoryRegion region = new ExternalWramRegion();
 
             // Write direct to the region instead of through AgbMemoryMap
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
+            for (uint i = ExternalWramRegion.REGION_START; i < ExternalWramRegion.REGION_START + ExternalWramRegion.REGION_SIZE; i++)
             {
                 region.Write(i, (byte)(i & 0xFF));
             }
 
             map.RegisterRegion(region);
 
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
+            for (uint i = ExternalWramRegion.REGION_START; i < ExternalWramRegion.REGION_START + ExternalWramRegion.REGION_SIZE; i++)
             {
                 Assert.Equal(i & 0xFF, map.Read(i));
             }
@@ -30,11 +30,11 @@ namespace AgbSharp.Core.Tests
         public void Write_RegisteredRegion_WriteRangeSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new InternalWramRegion();
+            IMemoryRegion region = new ExternalWramRegion();
 
             map.RegisterRegion(region);
 
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_SIZE; i++)
+            for (uint i = ExternalWramRegion.REGION_START; i < ExternalWramRegion.REGION_START + ExternalWramRegion.REGION_SIZE; i++)
             {
                 byte value = (byte)(i & 0xFF);
 
