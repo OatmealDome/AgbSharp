@@ -44,7 +44,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         private bool CheckCondition(uint conditionBits)
         {
-            InterpreterAssert(Enum.IsDefined(typeof(ArmInstructionCondition), conditionBits), "Invalid condition bits");
+            InterpreterAssert(Enum.IsDefined(typeof(ArmInstructionCondition), (int)conditionBits), "Invalid condition bits");
 
             ArmInstructionCondition condition = (ArmInstructionCondition)conditionBits;
 
