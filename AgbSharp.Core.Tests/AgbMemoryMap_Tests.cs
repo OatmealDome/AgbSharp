@@ -116,6 +116,64 @@ namespace AgbSharp.Core.Tests
             Assert.Equal(0xBB, val);
         }
 
+        [Fact]
+        public void ReadU32_WithDummyData_ReadSuccess()
+        {
+            AgbMemoryMap map = new AgbMemoryMap();
+            IMemoryRegion region = new TestMemoryRegion();
+
+            // Write directly to the region
+            region.Write(FIRST_RANGE_START, 0xAA);
+            region.Write(FIRST_RANGE_START + 1, 0xBB);
+            region.Write(FIRST_RANGE_START + 2, 0xCC);
+            region.Write(FIRST_RANGE_START + 3, 0xDD);
+
+            map.RegisterRegion(region);
+
+            Assert.Equal(0xAABBCCDD, map.ReadU32(FIRST_RANGE_START));
+        }
+
+        [Fact]
+        public void WriteU32_WithDummyData_WriteSuccess()
+        {
+            AgbMemoryMap map = new AgbMemoryMap();
+            IMemoryRegion region = new TestMemoryRegion();
+
+            map.RegisterRegion(region);
+
+            map.WriteU32(FIRST_RANGE_START, 0xAABBCCDD);
+
+            Assert.Equal(0xAABBCCDD, map.ReadU32(FIRST_RANGE_START));
+        }
+
+        [Fact]
+        public void ReadU16_WithDummyData_ReadSuccess()
+        {
+            AgbMemoryMap map = new AgbMemoryMap();
+            IMemoryRegion region = new TestMemoryRegion();
+
+            // Write directly to the region
+            region.Write(FIRST_RANGE_START, 0xAA);
+            region.Write(FIRST_RANGE_START + 1, 0xBB);
+
+            map.RegisterRegion(region);
+
+            Assert.Equal(0xAABB, map.ReadU16(FIRST_RANGE_START));
+        }
+
+        [Fact]
+        public void WriteU16_WithDummyData_WriteSuccess()
+        {
+            AgbMemoryMap map = new AgbMemoryMap();
+            IMemoryRegion region = new TestMemoryRegion();
+
+            map.RegisterRegion(region);
+
+            map.WriteU16(FIRST_RANGE_START, 0xAABB);
+
+            Assert.Equal(0xAABB, map.ReadU16(FIRST_RANGE_START));
+        }
+
         public static IEnumerable<object[]> TestRanges => new List<object[]>
         {
             new object[] { FIRST_RANGE_START },

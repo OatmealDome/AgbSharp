@@ -66,5 +66,29 @@ namespace AgbSharp.Core.Memory
             }
         }
         
+        public uint ReadU32(uint address)
+        {
+            return ((uint)Read(address) << 24) | ((uint)Read(address + 1) << 16) | ((uint)Read(address + 2) << 8) | Read(address + 3);
+        }
+
+        public void WriteU32(uint address, uint val)
+        {
+            Write(address, (byte)(val >> 24));
+            Write(address + 1, (byte)((val >> 16) & 0xFF));
+            Write(address + 2, (byte)((val >> 8) & 0xFF));
+            Write(address + 3, (byte)(val & 0xFF));
+        }
+
+        public ushort ReadU16(uint address)
+        {
+            return (ushort)((ushort)(Read(address) << 8) | Read(address + 1));
+        }
+
+        public void WriteU16(uint address, ushort val)
+        {
+            Write(address, (byte)((val >> 8) & 0xFF));
+            Write(address + 1, (byte)(val & 0xFF));
+        }
+        
     }
 }
