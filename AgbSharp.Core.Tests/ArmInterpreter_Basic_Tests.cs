@@ -7,6 +7,10 @@ namespace AgbSharp.Core.Tests
 {
     public class ArmInterpreter_Basic_Tests
     {
+        private const int SP = 13;
+        private const int LR = 14;
+        private const int PC = 15;
+
         private static AgbCpu CreateCpu()
         {
             AgbMemoryMap map = new AgbMemoryMap();
@@ -25,7 +29,7 @@ namespace AgbSharp.Core.Tests
                 cpu.MemoryMap.WriteU32(InternalWramRegion.REGION_START + (uint)i * 4, instructions[i]);
             }
 
-            cpu.CurrentRegisterSet.GetRegister(15) = InternalWramRegion.REGION_START;
+            cpu.CurrentRegisterSet.GetRegister(PC) = InternalWramRegion.REGION_START;
 
             for (int i = 0; i < instructions.Length; i++)
             {
@@ -50,7 +54,7 @@ namespace AgbSharp.Core.Tests
                 0xEA0003FE
             });
 
-            Assert.Equal(InternalWramRegion.REGION_START + 0x1000, cpu.CurrentRegisterSet.GetRegister(15));
+            Assert.Equal(InternalWramRegion.REGION_START + 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
         }
 
         [Fact]
@@ -61,7 +65,31 @@ namespace AgbSharp.Core.Tests
                 0xEAFFFBFE
             });
 
-            Assert.Equal(InternalWramRegion.REGION_START - 0x1000, cpu.CurrentRegisterSet.GetRegister(15));
+            Assert.Equal(InternalWramRegion.REGION_START - 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
+        }
+
+        [Fact]
+        public void BranchWithLink_BranchWithPositiveOffset_PcAndLrCorrect()
+        {
+            AgbCpu cpu = CreateAndRunCpu(new uint[]
+            {
+                0xEB0003FE
+            });
+
+            Assert.Equal(InternalWramRegion.REGION_START + 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
+            Assert.Equal(InternalWramRegion.REGION_START + 0x4, cpu.CurrentRegisterSet.GetRegister(LR));
+        }
+
+        [Fact]
+        public void BranchWithLink_BranchWithNegativeOffset_PcAndLrCorrect()
+        {
+            AgbCpu cpu = CreateAndRunCpu(new uint[]
+            {
+                0xEBFFFBFE
+            });
+
+            Assert.Equal(InternalWramRegion.REGION_START - 0x1000, cpu.CurrentRegisterSet.GetRegister(PC));
+            Assert.Equal(InternalWramRegion.REGION_START + 0x4, cpu.CurrentRegisterSet.GetRegister(LR));
         }
 
     }
