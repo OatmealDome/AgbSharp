@@ -121,7 +121,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (BitUtil.IsBitSet(instruction, 0)) // switch to Thumb
             {
-                Reg(PC) = Reg(targetRegister) - 1;
+                Reg(PC) = Reg(targetRegister - 1);
 
                 CurrentStatus.Thumb = true;
             }
