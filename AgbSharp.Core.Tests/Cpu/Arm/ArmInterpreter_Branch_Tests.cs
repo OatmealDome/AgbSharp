@@ -4,7 +4,7 @@ using Xunit;
 
 namespace AgbSharp.Core.Tests.Cpu.Arm
 {
-    public class ArmInterpreter_Basic_Tests
+    public class ArmInterpreter_Branch_Tests
     {
         [Fact]
         public void Branch_BranchWithPositiveOffset_PcCorrect()
