@@ -123,10 +123,10 @@ namespace AgbSharp.Core.Tests.Memory
             IMemoryRegion region = new TestMemoryRegion();
 
             // Write directly to the region
-            region.Write(FIRST_RANGE_START, 0xAA);
-            region.Write(FIRST_RANGE_START + 1, 0xBB);
-            region.Write(FIRST_RANGE_START + 2, 0xCC);
-            region.Write(FIRST_RANGE_START + 3, 0xDD);
+            region.Write(FIRST_RANGE_START, 0xDD);
+            region.Write(FIRST_RANGE_START + 1, 0xCC);
+            region.Write(FIRST_RANGE_START + 2, 0xBB);
+            region.Write(FIRST_RANGE_START + 3, 0xAA);
 
             map.RegisterRegion(region);
 
@@ -153,8 +153,8 @@ namespace AgbSharp.Core.Tests.Memory
             IMemoryRegion region = new TestMemoryRegion();
 
             // Write directly to the region
-            region.Write(FIRST_RANGE_START, 0xAA);
-            region.Write(FIRST_RANGE_START + 1, 0xBB);
+            region.Write(FIRST_RANGE_START, 0xBB);
+            region.Write(FIRST_RANGE_START + 1, 0xAA);
 
             map.RegisterRegion(region);
 
