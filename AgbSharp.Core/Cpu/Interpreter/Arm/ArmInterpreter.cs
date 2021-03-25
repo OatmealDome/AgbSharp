@@ -151,6 +151,128 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             return 2 + 1; // 2S + 1N
         }
 
+        private uint GetOperandByShiftingRegister(uint instruction, bool setConditionCodes)
+        {
+            int operandRegNum = BitUtil.GetBitRange(instruction, 0, 3);
+            uint operand = Reg(operandRegNum);
+
+            bool isZeroSpecialCase = false;
+
+            int shift;
+            if (BitUtil.IsBitSet(instruction, 4))
+            {
+                if (operandRegNum == PC)
+                {
+                    operand += 12;
+                }
+
+                shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
+            }
+            else // immediate
+            {
+                if (operandRegNum == PC)
+                {
+                    operand += 8;
+                }
+
+                shift = BitUtil.GetBitRange(instruction, 7, 11);
+
+                if (shift == 0)
+                {
+                    isZeroSpecialCase = true;
+                }
+            }
+
+            int shiftType = BitUtil.GetBitRange(instruction, 5, 6);
+            switch (shiftType)
+            {
+                case 0b00: // LSL
+                    if (!isZeroSpecialCase)
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 32 - shift);
+                        }
+
+                        operand <<= shift;
+                    }
+
+                    break;
+                case 0b01: // LSR
+                    if (isZeroSpecialCase)
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
+                        }
+
+                        operand = 0;
+                    }
+                    else
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
+                        }
+
+                        operand >>= shift;
+                    }
+
+                    break;
+                case 0b10: // ASR
+                    if (isZeroSpecialCase)
+                    {
+                        if (BitUtil.IsBitSet(operand, 31))
+                        {
+                            operand = 0xFFFFFFFF;
+                        }
+                        else
+                        {
+                            operand = 0x00000000;
+                        }
+                    }
+                    else
+                    {
+                        // C# will do an ASR if the left operand is an int
+                        operand = (uint)((int)operand >> shift);
+                    }
+
+                    if (setConditionCodes)
+                    {
+                        CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
+                    }
+
+                    break;
+                case 0b11: // ROR
+                    if (isZeroSpecialCase)
+                    {
+                        operand = BitUtil.RotateRight(operand, 1);
+
+                        if (CurrentStatus.Carry)
+                        {
+                            BitUtil.SetBit(ref operand, 31);
+                        }
+                        else
+                        {
+                            BitUtil.ClearBit(ref operand, 31);
+                        }
+                    }
+                    else
+                    {
+                        operand = BitUtil.RotateRight(operand, shift);
+
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
+                        }
+                    }
+
+                    break;
+            }
+
+            return operand;
+        }
+
         private uint GetSecondOperandForAluOperation(uint instruction, bool setConditionCodes)
         {
             uint secondOperand;
@@ -164,122 +286,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
             else // second operand is register
             {
-                int secondOperandRegNum = BitUtil.GetBitRange(instruction, 0, 3);
-                secondOperand = Reg(secondOperandRegNum);
-
-                bool isZeroSpecialCase = false;
-
-                int shift;
-                if (BitUtil.IsBitSet(instruction, 4))
-                {
-                    if (secondOperandRegNum == PC)
-                    {
-                        secondOperand += 12;
-                    }
-
-                    shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
-                }
-                else // immediate
-                {
-                    if (secondOperandRegNum == PC)
-                    {
-                        secondOperand += 8;
-                    }
-
-                    shift = BitUtil.GetBitRange(instruction, 7, 11);
-
-                    if (shift == 0)
-                    {
-                        isZeroSpecialCase = true;
-                    }
-                }
-
-                int shiftType = BitUtil.GetBitRange(instruction, 5, 6);
-                switch (shiftType)
-                {
-                    case 0b00: // LSL
-                        if (!isZeroSpecialCase)
-                        {
-                            if (setConditionCodes)
-                            {
-                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 32 - shift);
-                            }
-
-                            secondOperand <<= shift;
-                        }
-
-                        break;
-                    case 0b01: // LSR
-                        if (isZeroSpecialCase)
-                        {
-                            if (setConditionCodes)
-                            {
-                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
-                            }
-
-                            secondOperand = 0;
-                        }
-                        else
-                        {
-                            if (setConditionCodes)
-                            {
-                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
-                            }
-
-                            secondOperand >>= shift;
-                        }
-
-                        break;
-                    case 0b10: // ASR
-                        if (isZeroSpecialCase)
-                        {
-                            if (BitUtil.IsBitSet(secondOperand, 31))
-                            {
-                                secondOperand = 0xFFFFFFFF;
-                            }
-                            else
-                            {
-                                secondOperand = 0x00000000;
-                            }
-                        }
-                        else
-                        {
-                            // C# will do an ASR if the left operand is an int
-                            secondOperand = (uint)((int)secondOperand >> shift);
-                        }
-
-                        if (setConditionCodes)
-                        {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
-                        }
-
-                        break;
-                    case 0b11: // ROR
-                        if (isZeroSpecialCase)
-                        {
-                            secondOperand = BitUtil.RotateRight(secondOperand, 1);
-
-                            if (CurrentStatus.Carry)
-                            {
-                                BitUtil.SetBit(ref secondOperand, 31);
-                            }
-                            else
-                            {
-                                BitUtil.ClearBit(ref secondOperand, 31);
-                            }
-                        }
-                        else
-                        {
-                            secondOperand = BitUtil.RotateRight(secondOperand, shift);
-
-                            if (setConditionCodes)
-                            {
-                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
-                            }
-                        }
-
-                        break;
-                }
+                secondOperand = GetOperandByShiftingRegister(instruction, setConditionCodes);
             }
 
             return secondOperand;
