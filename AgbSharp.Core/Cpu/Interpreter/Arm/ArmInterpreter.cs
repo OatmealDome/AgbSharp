@@ -204,7 +204,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     case 0b00: // LSL
                         if (!isZeroSpecialCase)
                         {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 32 - shift);
+                            if (setConditionCodes)
+                            {
+                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 32 - shift);
+                            }
 
                             secondOperand <<= shift;
                         }
@@ -213,13 +216,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     case 0b01: // LSR
                         if (isZeroSpecialCase)
                         {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
+                            if (setConditionCodes)
+                            {
+                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
+                            }
 
                             secondOperand = 0;
                         }
                         else
                         {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
+                            if (setConditionCodes)
+                            {
+                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
+                            }
 
                             secondOperand >>= shift;
                         }
@@ -243,7 +252,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                             secondOperand = (uint)((int)secondOperand >> shift);
                         }
 
-                        CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, 31);
+                        }
 
                         break;
                     case 0b11: // ROR
@@ -264,7 +276,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                         {
                             secondOperand = BitUtil.RotateRight(secondOperand, shift);
 
-                            CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
+                            if (setConditionCodes)
+                            {
+                                CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
+                            }
                         }
 
                         break;

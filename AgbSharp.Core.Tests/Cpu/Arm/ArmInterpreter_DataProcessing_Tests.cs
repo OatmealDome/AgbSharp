@@ -436,7 +436,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00C01 // MOV r0, r1, LSL#24
+                0xE1B00C01 // MOVS r0, r1, LSL#24
             });
 
             Assert.Equal((uint)0xFF000000, cpu.CurrentRegisterSet.GetRegister(0));
@@ -454,7 +454,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00C21 // MOV r0, r1, LSR#24
+                0xE1B00C21 // MOVS r0, r1, LSR#24
             });
 
             Assert.Equal((uint)0x000000FF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -472,7 +472,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A006C1 // MOV r0, r1, ASR#13
+                0xE1B006C1 // MOVS r0, r1, ASR#13
             });
 
             Assert.Equal((uint)0xFFFC00FF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -490,7 +490,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00461 // MOV r0, r1, ROR#8
+                0xE1B00461 // MOVS r0, r1, ROR#8
             });
 
             Assert.Equal((uint)0xFF0000FF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -508,7 +508,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00001 // MOV r0, r1, LSL#0
+                0xE1B00001 // MOVS r0, r1, LSL#0
             });
 
             Assert.Equal((uint)0x000001FF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -526,7 +526,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00021 // MOV r0, r1, LSR#0
+                0xE1B00021 // MOVS r0, r1, LSR#0
             });
 
             Assert.Equal((uint)0x00000000, cpu.CurrentRegisterSet.GetRegister(0));
@@ -544,7 +544,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00041 // MOV r0, r1, ASR#0
+                0xE1B00041 // MOVS r0, r1, ASR#0
             });
 
             Assert.Equal((uint)0xFFFFFFFF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -562,7 +562,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00061 // MOV r0, r1, ROR#0
+                0xE1B00061 // MOVS r0, r1, ROR#0
             });
 
             Assert.Equal((uint)0x00007FFF, cpu.CurrentRegisterSet.GetRegister(0));
@@ -581,7 +581,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE1A00211 // MOV r0, r1, LSL r2
+                0xE1B00211 // MOVS r0, r1, LSL r2
             });
 
             Assert.Equal((uint)0xFF000000, cpu.CurrentRegisterSet.GetRegister(0));
