@@ -44,11 +44,11 @@ namespace AgbSharp.Core.Tests.Cpu
             }
         }
 
-        public static AgbCpu CreateAndRunCpu(uint[] instructions)
+        public static AgbCpu CreateAndRunCpu(uint[] instructions, bool littleEndian = false)
         {
             AgbCpu cpu = CreateCpu();
 
-            RunCpu(cpu, instructions);
+            RunCpu(cpu, instructions, littleEndian);
 
             return cpu;
         }
