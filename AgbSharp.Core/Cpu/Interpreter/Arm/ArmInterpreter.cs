@@ -14,7 +14,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
         {
             Reg(PC) += 4;
             
-            uint instruction = Cpu.MemoryMap.ReadU32(Reg(PC));
+            uint instruction = ByteUtil.SwapEndianness(Cpu.MemoryMap.ReadU32(Reg(PC)));
 
             int cycles = ExecuteInstruction(instruction);
 
