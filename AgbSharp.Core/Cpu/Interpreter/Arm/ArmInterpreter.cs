@@ -138,25 +138,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             return 2 + 1; // 2S + 1N
         }
 
-        private int AluOperation(uint instruction)
+        private uint GetSecondOperandForAluOperation(uint instruction, bool setConditionCodes)
         {
-            // for cycle calculation (see GBATEK)
-            int p = 0;
-            int r = 0;
-
-            bool setConditionCodes = BitUtil.IsBitSet(instruction, 20);
-
-            ref uint firstOperand = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
-
-            int destinationRegNum = BitUtil.GetBitRange(instruction, 12, 15);
-            ref uint destinationReg = ref Reg(destinationRegNum);
-
-            if (destinationRegNum == PC)
-            {
-                p = 1;
-            }
-
             uint secondOperand;
+
             if (BitUtil.IsBitSet(instruction, 25)) // second operand is immediate
             {
                 secondOperand = (uint)BitUtil.GetBitRange(instruction, 0, 7);
@@ -180,8 +165,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     }
 
                     shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
-
-                    r = 1;
                 }
                 else // immediate
                 {
@@ -285,6 +268,35 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                         break;
                 }
             }
+
+            return secondOperand;
+        }
+
+        private int AluOperation(uint instruction)
+        {
+            // for cycle calculation (see GBATEK)
+            int p = 0;
+            int r = 0;
+
+            bool setConditionCodes = BitUtil.IsBitSet(instruction, 20);
+
+            ref uint firstOperand = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+
+            int destinationRegNum = BitUtil.GetBitRange(instruction, 12, 15);
+            ref uint destinationReg = ref Reg(destinationRegNum);
+
+            if (destinationRegNum == PC)
+            {
+                p = 1;
+            }
+
+            // Op2 is register and shift by register
+            if (BitUtil.IsBitSet(instruction, 25) && BitUtil.IsBitSet(instruction, 4))
+            {
+                r = 1;
+            }
+
+            uint secondOperand = GetSecondOperandForAluOperation(instruction, setConditionCodes);
 
             uint result;
             
