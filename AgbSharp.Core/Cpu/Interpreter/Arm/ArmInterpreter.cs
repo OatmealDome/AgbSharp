@@ -34,6 +34,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     {
                         return MultiplyOperation(instruction);
                     }
+                    else if (BitUtil.GetBitRange(instruction, 23, 24) == 0b10
+                            && !BitUtil.IsBitSet(instruction, 20))
+                    {
+                        return PsrOperation(instruction);
+                    }
                     else // Data Processing (ALU)
                     {
                         return AluOperation(instruction);
@@ -511,6 +516,57 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
 
             return 0;
+        }
+
+        private int PsrOperation(uint instruction)
+        {
+            ProgramStatus programStatus;
+
+            if (BitUtil.IsBitSet(instruction, 22))
+            {
+                programStatus = SavedStatus;   
+            }
+            else
+            {
+                programStatus = CurrentStatus;
+            }
+
+            if (BitUtil.IsBitSet(instruction, 21)) // MSR
+            {
+                uint secondOperand = GetSecondOperandForAluOperation(instruction, false);
+
+                uint toWrite = 0;
+
+                if (BitUtil.IsBitSet(instruction, 19))
+                {
+                    toWrite |= secondOperand & 0xFF000000;
+                }
+                
+                if (BitUtil.IsBitSet(instruction, 18))
+                {
+                    toWrite |= secondOperand & 0x00FF0000;
+                }
+
+                if (BitUtil.IsBitSet(instruction, 17))
+                {
+                    toWrite |= secondOperand & 0x0000FF00;
+                }
+
+                if (BitUtil.IsBitSet(instruction, 16))
+                {
+                    toWrite |= secondOperand & 0x000000FF;
+                }
+
+                programStatus.RegisterValue = toWrite;
+            }
+            else // MRS
+            {
+                ref uint destinationReg = ref Reg(BitUtil.GetBitRange(instruction, 12, 15));
+
+                destinationReg = programStatus.RegisterValue;
+            }
+
+            return 1; // 1S
         }
 
     }
