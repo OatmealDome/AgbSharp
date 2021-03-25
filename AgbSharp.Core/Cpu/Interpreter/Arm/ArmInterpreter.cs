@@ -28,6 +28,12 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     {
                         return BranchExchange(instruction);
                     }
+                    else if (BitUtil.GetBitRange(instruction, 25, 27) == 0b000 
+                            && BitUtil.IsBitSet(instruction, 7)
+                            && BitUtil.IsBitSet(instruction, 4)) // Multiply
+                    {
+                        return MultiplyOperation(instruction);
+                    }
                     else // Data Processing (ALU)
                     {
                         return AluOperation(instruction);
@@ -395,6 +401,89 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
 
             return (1 + p) + r + p; // (1 + p)S + rI + pN
+        }
+        
+        private int MultiplyOperation(uint instruction)
+        {
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 16, 19)); // RdHi
+            ref uint nReg = ref Reg(BitUtil.GetBitRange(instruction, 12, 15)); // RdLo
+            ref uint sReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 11));
+            ref uint mReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 3));
+
+            bool setConditionCodes = BitUtil.IsBitSet(instruction, 20);
+
+            bool isLong = false;
+            
+            int opcode = BitUtil.GetBitRange(instruction, 21, 24);
+            switch (opcode)
+            {
+                case 0b0000: // MUL
+                    dReg = mReg * sReg;
+                    break;
+                case 0b0001: // MLA
+                    dReg = (mReg * sReg) + nReg;
+                    break;
+                case 0b0100: // UMULL
+                    ulong umullResult = (ulong)mReg * sReg;
+
+                    dReg = (uint)(umullResult >> 32);
+                    nReg = (uint)(umullResult & 0xFFFFFFFF);
+
+                    isLong = true;
+
+                    break;
+                case 0b0101: // UMLAL
+                    ulong umlalAccumulate = ((ulong)dReg << 32) | nReg;
+
+                    ulong umlalResult = ((ulong)mReg * sReg) + umlalAccumulate;
+
+                    dReg = (uint)(umlalResult >> 32);
+                    nReg = (uint)(umlalResult & 0xFFFFFFFF);
+
+                    isLong = true;
+
+                    break;
+                case 0b0110: // SMULL
+                    int mRegInt = (int)mReg;
+                    int sRegInt = (int)sReg;
+                    long smullResult = (long)mRegInt * (long)sRegInt;
+
+                    dReg = (uint)(smullResult >> 32);
+                    nReg = (uint)(smullResult & 0xFFFFFFFF);
+
+                    isLong = true;
+
+                    break;
+                case 0b0111: // SMLAL
+                    long smlalAccumulate = (long)(((ulong)dReg << 32) | nReg);
+
+                    int mRegIntSmlal = (int)mReg;
+                    int sRegIntSmlal = (int)sReg;
+                    long smlalResult = ((long)mRegIntSmlal * sRegIntSmlal) + smlalAccumulate;
+
+                    dReg = (uint)(smlalResult >> 32);
+                    nReg = (uint)(smlalResult & 0xFFFFFFFF);
+
+                    isLong = true;
+
+                    break; 
+            }
+
+            if (setConditionCodes)
+            {
+                if (isLong)
+                {
+                    CurrentStatus.Zero = dReg == 0;
+                }
+                else
+                {
+                    CurrentStatus.Zero = dReg == 0 && nReg == 0;
+                }
+                
+                CurrentStatus.Negative = BitUtil.IsBitSet(dReg, 31);
+            }
+
+            return 0;
         }
 
     }
