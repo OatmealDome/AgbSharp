@@ -51,6 +51,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     {
                         return AluOperation(instruction);
                     }
+                case 0b01:
+                    return LoadStoreOperation(instruction);
                 case 0b10: // Branch
                     return Branch(instruction);
             }
@@ -582,6 +584,103 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
 
             return 1; // 1S
+        }
+
+        private int LoadStoreOperation(uint instruction)
+        {
+            ref uint nReg = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+
+            int dRegNum = BitUtil.GetBitRange(instruction, 12, 15);
+            ref uint dReg = ref Reg(dRegNum);
+
+            bool isImmediateOffset = !BitUtil.IsBitSet(instruction, 25);
+            bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
+            bool isUp = BitUtil.IsBitSet(instruction, 23);
+            bool isByte = BitUtil.IsBitSet(instruction, 22);
+            bool isWriteBack = BitUtil.IsBitSet(instruction, 21);
+            bool isLoad = BitUtil.IsBitSet(instruction, 20);
+
+            // For information about pre-/post-load and write back:
+            // https://www.cs.uregina.ca/Links/class-info/301/ARM-addressing/lecture.html
+
+            uint offset;
+            if (isImmediateOffset)
+            {
+                offset = (uint)BitUtil.GetBitRange(instruction, 0, 11);
+            }
+            else
+            {
+                offset = GetOperandByShiftingRegister(instruction, false);
+            }
+
+            uint address;
+            if (isUp)
+            {
+                address = nReg + offset;
+            }
+            else
+            {
+                address = nReg - offset;
+            }
+
+            uint effectiveAddress;
+            if (isPreIndex)
+            {
+                effectiveAddress = address;
+            }
+            else
+            {
+                effectiveAddress = nReg;
+            }
+
+            if (isWriteBack || !isPreIndex)
+            {
+                nReg = address;
+            }
+
+            if (isLoad)
+            {
+                if (isByte)
+                {
+                    dReg = Cpu.MemoryMap.Read(effectiveAddress);
+                }
+                else
+                {
+                    // Check if aligned on a half-word boundary
+                    if (effectiveAddress % 4 != 0 && effectiveAddress % 2 == 0)
+                    {
+                        // Read the half-word at this address, but don't touch the higher bits
+                        // (on a real ARM CPU, they will be garbage).
+                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
+                    }
+                    else
+                    {
+                        dReg = Cpu.MemoryMap.ReadU32(effectiveAddress);
+                    }
+                }
+
+                if (dRegNum == PC)
+                {
+                    return 2 + 2 + 1; // 2S + 2N + 1I
+                }
+                else
+                {
+                    return 1 + 1 + 1; // 1S + 1N + 1I
+                }
+            }
+            else
+            {
+                if (isByte)
+                {
+                    Cpu.MemoryMap.Write(effectiveAddress, (byte)dReg);
+                }
+                else
+                {
+                    Cpu.MemoryMap.WriteU32(effectiveAddress, dReg);
+                }
+
+                return 2; // 2N
+            }
         }
 
     }
