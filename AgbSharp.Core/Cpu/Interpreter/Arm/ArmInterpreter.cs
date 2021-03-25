@@ -12,9 +12,17 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         public override int Step()
         {
-            uint instruction = Cpu.MemoryMap.ReadU32(Reg(PC));
             Reg(PC) += 4;
+            
+            uint instruction = Cpu.MemoryMap.ReadU32(Reg(PC));
 
+            int cycles = ExecuteInstruction(instruction);
+
+            return cycles;
+        }
+
+        private int ExecuteInstruction(uint instruction)
+        {
             if (!CheckCondition(instruction >> 28))
             {
                 return 1; // 1S
@@ -111,10 +119,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (BitUtil.IsBitSet(instruction, 24)) // BL
             {
-                Reg(LR) = Reg(PC);
+                Reg(LR) = Reg(PC) + 4;
             }
 
-            Reg(PC) += 4;
+            Reg(PC) += 8;
             Reg(PC) += (uint)(4 * offset);
 
             return 2 + 1; // 2S + 1N
@@ -126,7 +134,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (BitUtil.IsBitSet(instruction, 5)) // BLX
             {
-                Reg(LR) = Reg(PC);
+                Reg(LR) = Reg(PC) + 4;
             }
 
             if (BitUtil.IsBitSet(instruction, 0)) // switch to Thumb
@@ -166,7 +174,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 {
                     if (secondOperandRegNum == PC)
                     {
-                        secondOperand += 8;
+                        secondOperand += 12;
                     }
 
                     shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
@@ -175,7 +183,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 {
                     if (secondOperandRegNum == PC)
                     {
-                        secondOperand += 4;
+                        secondOperand += 8;
                     }
 
                     shift = BitUtil.GetBitRange(instruction, 7, 11);
