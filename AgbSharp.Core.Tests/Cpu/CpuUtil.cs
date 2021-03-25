@@ -1,6 +1,7 @@
 using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Ram;
+using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Tests.Cpu
 {
@@ -21,11 +22,18 @@ namespace AgbSharp.Core.Tests.Cpu
             return cpu;
         }
 
-        public static void RunCpu(AgbCpu cpu, uint[] instructions)
+        public static void RunCpu(AgbCpu cpu, uint[] instructions, bool littleEndian = false)
         {
             for (int i = 0; i < instructions.Length; i++)
             {
-                cpu.MemoryMap.WriteU32(InternalWramRegion.REGION_START + (uint)i * 4, instructions[i]);
+                uint instruction = instructions[i];
+
+                if (!littleEndian)
+                {
+                    instruction = ByteUtil.SwapEndianness(instruction);
+                }
+
+                cpu.MemoryMap.WriteU32(InternalWramRegion.REGION_START + (uint)i * 4, instruction);
             }
 
             cpu.CurrentRegisterSet.GetRegister(PC) = InternalWramRegion.REGION_START - 4;
