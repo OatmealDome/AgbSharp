@@ -2,7 +2,7 @@ using AgbSharp.Core.Util;
 using System.Collections.Generic;
 using Xunit;
 
-namespace AgbSharp.Core.Tests
+namespace AgbSharp.Core.Tests.Util
 {
     public class BitUtil_Tests
     {
