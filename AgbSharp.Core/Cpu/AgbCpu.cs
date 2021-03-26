@@ -23,9 +23,25 @@ namespace AgbSharp.Core.Cpu
         private Dictionary<CpuMode, IRegisterSet> RegisterSets;
         private Dictionary<CpuMode, ProgramStatus> SavedStatuses;
 
-        public IRegisterSet CurrentRegisterSet; // R0 to R15
-        public ProgramStatus CurrentStatus; // CPSR
-        public ProgramStatus CurrentSavedStatus; // SPSR
+        public IRegisterSet CurrentRegisterSet
+        {
+            get
+            {
+                return RegisterSets[CurrentStatus.Mode];
+            }
+        }
+
+        // CPSR
+        public ProgramStatus CurrentStatus;
+
+        // SPSR
+        public ProgramStatus CurrentSavedStatus
+        {
+            get
+            {
+                return SavedStatuses[CurrentStatus.Mode];
+            }
+        }
 
         private ArmInterpreter ArmInterpreter;
         // private ThumbInterpreter ThumbInterpreter;
@@ -54,9 +70,8 @@ namespace AgbSharp.Core.Cpu
             SavedStatuses[CpuMode.Abort] = new ProgramStatus();
             SavedStatuses[CpuMode.Undefined] = new ProgramStatus();
 
-            CurrentRegisterSet = RegisterSets[CpuMode.User];
             CurrentStatus = new ProgramStatus();
-            CurrentSavedStatus = null;
+            CurrentStatus.Mode = CpuMode.User;
 
             ArmInterpreter = new ArmInterpreter(this);
             // ThumbInterpreter = new ThumbInterpreter(this);
