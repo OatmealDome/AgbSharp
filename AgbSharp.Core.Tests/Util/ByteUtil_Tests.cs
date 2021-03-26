@@ -13,5 +13,13 @@ namespace AgbSharp.Core.Tests.Util
             Assert.Equal((uint)0xDDCCBBAA, ByteUtil.Swap32(i));
         }
 
+        [Fact]
+        public void Swap16_SwapConstant_EqualExpected()
+        {
+            ushort i = 0xAABB;
+
+            Assert.Equal((ushort)0xBBAA, ByteUtil.Swap16(i));
+        }
+
     }
 }

@@ -16,5 +16,14 @@ namespace AgbSharp.Core.Util
             return b1 << 24 | b2 << 16 | b3 << 8 | b4;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort Swap16(ushort value)
+        {
+            var b1 = value & 0xff;
+            var b2 = (value >> 8) & 0xff;
+
+            return (ushort)(b1 << 8 | b2);
+        }
+
     }
 }
