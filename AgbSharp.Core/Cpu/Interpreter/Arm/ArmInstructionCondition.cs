@@ -1,6 +1,6 @@
 namespace AgbSharp.Core.Cpu.Interpreter.Arm
 {
-    enum ArmInstructionCondition : int
+    public enum ArmInstructionCondition : int
     {
         Equal = 0, // EQ
         NotEqual = 1, // NE
