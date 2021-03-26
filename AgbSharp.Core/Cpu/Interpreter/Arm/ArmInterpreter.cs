@@ -12,17 +12,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         public override int Step()
         {
-            Reg(PC) += 4;
-            
             uint instruction = ByteUtil.SwapEndianness(Cpu.MemoryMap.ReadU32(Reg(PC)));
+            Reg(PC) += 4;
 
-            int cycles = ExecuteInstruction(instruction);
-
-            return cycles;
-        }
-
-        private int ExecuteInstruction(uint instruction)
-        {
             if (!CheckCondition(instruction >> 28))
             {
                 return 1; // 1S
@@ -140,10 +132,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (BitUtil.IsBitSet(instruction, 24)) // BL
             {
-                Reg(LR) = Reg(PC) + 4;
+                Reg(LR) = Reg(PC);
             }
 
-            Reg(PC) += 8;
+            Reg(PC) += 4;
             Reg(PC) += (uint)(4 * offset);
 
             return 2 + 1; // 2S + 1N
@@ -155,7 +147,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (BitUtil.IsBitSet(instruction, 5)) // BLX
             {
-                Reg(LR) = Reg(PC) + 4;
+                Reg(LR) = Reg(PC);
             }
 
             if (BitUtil.IsBitSet(instruction, 0)) // switch to Thumb
@@ -184,7 +176,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             {
                 if (operandRegNum == PC)
                 {
-                    operand += 12;
+                    operand += 8;
                 }
 
                 shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
@@ -193,7 +185,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             {
                 if (operandRegNum == PC)
                 {
-                    operand += 8;
+                    operand += 4;
                 }
 
                 shift = BitUtil.GetBitRange(instruction, 7, 11);

@@ -36,7 +36,7 @@ namespace AgbSharp.Core.Tests.Cpu
                 cpu.MemoryMap.WriteU32(InternalWramRegion.REGION_START + (uint)i * 4, instruction);
             }
 
-            cpu.CurrentRegisterSet.GetRegister(PC) = InternalWramRegion.REGION_START - 4;
+            cpu.CurrentRegisterSet.GetRegister(PC) = InternalWramRegion.REGION_START;
 
             for (int i = 0; i < instructions.Length; i++)
             {
