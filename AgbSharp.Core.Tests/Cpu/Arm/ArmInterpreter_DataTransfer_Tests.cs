@@ -60,7 +60,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0xCCCCCCCC, cpu.MemoryMap.ReadU32(targetAddress + (11 * 4)));
             Assert.Equal((uint)0xDDDDDDDD, cpu.MemoryMap.ReadU32(targetAddress + (12 * 4)));
             Assert.Equal((uint)0xEEEEEEEE, cpu.MemoryMap.ReadU32(targetAddress + (13 * 4)));
-            Assert.Equal(InternalWramRegion.REGION_START, cpu.MemoryMap.ReadU32(targetAddress + (14 * 4)));
+            Assert.Equal(InternalWramRegion.REGION_START + 4, cpu.MemoryMap.ReadU32(targetAddress + (14 * 4)));
         }
 
         [Fact]
