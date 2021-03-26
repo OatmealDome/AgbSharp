@@ -12,7 +12,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         public override int Step()
         {
-            uint instruction = ByteUtil.SwapEndianness(Cpu.MemoryMap.ReadU32(Reg(PC)));
+            uint instruction = ByteUtil.Swap32(Cpu.MemoryMap.ReadU32(Reg(PC)));
             Reg(PC) += 4;
 
             if (!CheckCondition(instruction >> 28))

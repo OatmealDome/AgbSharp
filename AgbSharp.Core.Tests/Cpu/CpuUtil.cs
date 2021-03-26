@@ -30,7 +30,7 @@ namespace AgbSharp.Core.Tests.Cpu
 
                 if (!littleEndian)
                 {
-                    instruction = ByteUtil.SwapEndianness(instruction);
+                    instruction = ByteUtil.Swap32(instruction);
                 }
 
                 cpu.MemoryMap.WriteU32(InternalWramRegion.REGION_START + (uint)i * 4, instruction);

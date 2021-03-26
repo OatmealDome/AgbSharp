@@ -6,7 +6,7 @@ namespace AgbSharp.Core.Util
     {
         // adapted from https://stackoverflow.com/a/8241150
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint SwapEndianness(uint value)
+        public static uint Swap32(uint value)
         {
             var b1 = value & 0xff;
             var b2 = (value >> 8) & 0xff;
