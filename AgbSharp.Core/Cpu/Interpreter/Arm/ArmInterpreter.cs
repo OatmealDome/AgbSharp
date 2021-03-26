@@ -66,6 +66,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     {
                         return BlockDataTransferOperation(instruction);
                     }
+                case 0b11: // SWI
+                    return SwiOperation(instruction);
             }
 
             InterpreterAssert($"Unknown instruction ({instruction:x8}");
@@ -932,6 +934,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             dReg = value;
 
             return 1 + 2 + 1; // 1S + 2N + 1I            
+        }
+
+        private int SwiOperation(uint instruction)
+        {
+            uint previousPsr = CurrentStatus.RegisterValue;
+
+            CurrentStatus.Mode = CpuMode.Supervisor;
+
+            SavedStatus.RegisterValue = previousPsr;
+
+            Reg(PC) = 0x00000008;
+
+            return 2 + 1; // 2S + 1N
         }
 
     }
