@@ -62,7 +62,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 case 0b01:
                     return LoadStoreOperation(instruction);
                 case 0b10: // Branch
-                    return Branch(instruction);
+                    if (BitUtil.IsBitSet(instruction, 25))
+                    {
+                        return Branch(instruction);
+                    }
+                    else
+                    {
+                        return BlockDataTransferOperation(instruction);
+                    }
             }
 
             InterpreterAssert($"Unknown instruction ({instruction:x8}");
@@ -789,6 +796,118 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 Cpu.MemoryMap.WriteU16(effectiveAddress, (ushort)dReg);
 
                 return 2; // 2S
+            }
+        }
+
+        private int BlockDataTransferOperation(uint instruction)
+        {
+            int nRegNum = BitUtil.GetBitRange(instruction, 16, 19);
+            ref uint nReg = ref Reg(nRegNum);
+
+            bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
+            bool isUp = BitUtil.IsBitSet(instruction, 23);
+            bool sFlag = BitUtil.IsBitSet(instruction, 22);
+            bool isWriteBack = BitUtil.IsBitSet(instruction, 21);
+            bool isLoad = BitUtil.IsBitSet(instruction, 20);
+
+            bool useUserBank = false;
+
+            if (sFlag && isLoad && BitUtil.IsBitSet(instruction, PC))
+            {
+                CurrentStatus.RegisterValue = SavedStatus.RegisterValue;
+            }
+            else
+            {
+                useUserBank = true;
+            }
+
+            int transferredWords = 0;
+
+            for (int i = 0; i < 16; i++)
+            {
+                int regNum;
+
+                if (isPreIndex && !isUp)
+                {
+                    regNum = 15 - i;
+                }
+                else
+                {
+                    regNum = i;
+                }
+
+                if (!BitUtil.IsBitSet(instruction, regNum))
+                {
+                    continue;
+                }
+
+                uint address;
+                if (isUp)
+                {
+                    address = nReg + 4;
+                }
+                else
+                {
+                    address = nReg - 4;
+                }
+
+                uint effectiveAddress;
+                if (isPreIndex)
+                {
+                    effectiveAddress = address;
+                }
+                else
+                {
+                    effectiveAddress = nReg;
+                }
+
+                if (isLoad)
+                {
+                    uint value = Cpu.MemoryMap.ReadU32(effectiveAddress);
+
+                    if (useUserBank)
+                    {
+                        Cpu.RegUser(regNum) = value;
+                    }
+                    else
+                    {
+                        Reg(regNum) = value;
+                    }
+                }
+                else
+                {
+                    if (useUserBank)
+                    {
+                        Cpu.MemoryMap.WriteU32(effectiveAddress, Cpu.RegUser(regNum));
+                    }
+                    else
+                    {
+                        Cpu.MemoryMap.WriteU32(effectiveAddress, Reg(regNum));
+                    }
+                }
+
+                if (isWriteBack || !isPreIndex)
+                {
+                    nReg = address;
+                }
+
+                transferredWords++;
+            }
+
+            if (isLoad)
+            {
+                if (nRegNum == PC)
+                {
+                    return (transferredWords + 1) + 2 + 1; // (n+1)S + 2N + 1I
+                }
+                else
+                {
+                    return (transferredWords) + 1 + 1; // nS + 1S + 1I
+                }
+            }
+            else
+            {
+                return (transferredWords - 1) + 2; // (n-1)S + 2N
             }
         }
 
