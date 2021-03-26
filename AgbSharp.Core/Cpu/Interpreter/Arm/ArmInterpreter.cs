@@ -105,7 +105,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 case ArmInstructionCondition.UnsignedHigher:
                     return CurrentStatus.Carry && !CurrentStatus.Zero;
                 case ArmInstructionCondition.UnsignedLowerOrSame:
-                    return !CurrentStatus.Carry && CurrentStatus.Zero;
+                    return !CurrentStatus.Carry || CurrentStatus.Zero;
                 case ArmInstructionCondition.GreaterThanOrEqual:
                     return CurrentStatus.Negative == CurrentStatus.Overflow;
                 case ArmInstructionCondition.LessThan:
@@ -113,7 +113,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 case ArmInstructionCondition.GreaterThan:
                     return !CurrentStatus.Zero && CurrentStatus.Negative == CurrentStatus.Overflow;
                 case ArmInstructionCondition.LessThanOrEqual:
-                    return CurrentStatus.Zero && CurrentStatus.Negative != CurrentStatus.Overflow;
+                    return CurrentStatus.Zero || CurrentStatus.Negative != CurrentStatus.Overflow;
             }
 
             // Should never reach here
