@@ -29,7 +29,8 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
         {
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.CurrentSavedStatus = new ProgramStatus();
+            cpu.CurrentStatus.Mode = CpuMode.System;
+
             cpu.CurrentSavedStatus.RegisterValue = (uint)0b11111000000000000000000011000000;
 
             cpu.CurrentRegisterSet.GetRegister(0) = 0xDEADBEEF;
@@ -48,15 +49,15 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
         {
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.CurrentRegisterSet.GetRegister(0) = 0b11111000000000000000000011000000;
+            cpu.CurrentRegisterSet.GetRegister(0) = 0b11111000000000000000000011110000;
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
                 0xE129F000 // MSR CPSR, r0
             });
 
-            Assert.Equal((uint)0b11111000000000000000000011000000, cpu.CurrentStatus.RegisterValue);
-            Assert.Equal((uint)0b11111000000000000000000011000000, cpu.CurrentRegisterSet.GetRegister(0));
+            Assert.Equal((uint)0b11111000000000000000000011110000, cpu.CurrentStatus.RegisterValue);
+            Assert.Equal((uint)0b11111000000000000000000011110000, cpu.CurrentRegisterSet.GetRegister(0));
         }
 
         [Fact]
@@ -64,7 +65,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
         {
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.CurrentSavedStatus = new ProgramStatus();
+            cpu.CurrentStatus.Mode = CpuMode.System;
 
             cpu.CurrentRegisterSet.GetRegister(0) = 0b11111000000000000000000011000000;
 
