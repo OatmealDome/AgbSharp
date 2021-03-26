@@ -45,6 +45,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                         {
                             return LoadStoreHalfSignedOperation(instruction);
                         }
+                        else if (BitUtil.IsBitSet(instruction, 24))
+                        {
+                            return SwapOperation(instruction);
+                        }
                         else
                         {
                             return MultiplyOperation(instruction);
@@ -909,6 +913,33 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             {
                 return (transferredWords - 1) + 2; // (n-1)S + 2N
             }
+        }
+
+        private int SwapOperation(uint instruction)
+        {
+            bool isByte = BitUtil.IsBitSet(instruction, 22);
+
+            ref uint nReg = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 12, 15));
+            ref uint mReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 3));
+
+            uint value;
+            if (isByte)
+            {
+                value = Cpu.MemoryMap.Read(nReg);
+
+                Cpu.MemoryMap.Write(nReg, (byte)(mReg & 0xFF));
+            }
+            else
+            {
+                value = Cpu.MemoryMap.ReadU32(nReg);
+
+                Cpu.MemoryMap.WriteU32(nReg, mReg);
+            }
+
+            dReg = value;
+
+            return 1 + 2 + 1; // 1S + 2N + 1I            
         }
 
     }
