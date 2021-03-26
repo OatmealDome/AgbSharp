@@ -36,11 +36,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     {
                         return BranchExchange(instruction);
                     }
-                    else if (BitUtil.GetBitRange(instruction, 25, 27) == 0b000 
+                    else if (!BitUtil.IsBitSet(instruction, 25) // 25 to 27 is 0b000 
                             && BitUtil.IsBitSet(instruction, 7)
-                            && BitUtil.IsBitSet(instruction, 4)) // Multiply
+                            && BitUtil.IsBitSet(instruction, 4))
                     {
-                        return MultiplyOperation(instruction);
+                        int sh = BitUtil.GetBitRange(instruction, 5, 6);
+                        if (sh != 0)
+                        {
+                            return LoadStoreHalfSignedOperation(instruction);
+                        }
+                        else
+                        {
+                            return MultiplyOperation(instruction);
+                        }
                     }
                     else if (BitUtil.GetBitRange(instruction, 23, 24) == 0b10
                             && !BitUtil.IsBitSet(instruction, 20))
@@ -680,6 +688,107 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
 
                 return 2; // 2N
+            }
+        }
+
+        private int LoadStoreHalfSignedOperation(uint instruction)
+        {
+            ref uint nReg = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+
+            int dRegNum = BitUtil.GetBitRange(instruction, 12, 15);
+            ref uint dReg = ref Reg(dRegNum);
+
+
+            bool isImmediateOffset = !BitUtil.IsBitSet(instruction, 25);
+            bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
+            bool isUp = BitUtil.IsBitSet(instruction, 23);
+            bool isWriteBack = BitUtil.IsBitSet(instruction, 21);
+            bool isLoad = BitUtil.IsBitSet(instruction, 20);
+
+            uint offset;
+            if (BitUtil.IsBitSet(instruction, 22))
+            {
+                uint loNybble = (uint)BitUtil.GetBitRange(instruction, 0, 3);
+                uint hiNybble = (uint)BitUtil.GetBitRange(instruction, 8, 11);
+
+                offset = hiNybble << 4 | loNybble;
+            }
+            else
+            {
+                offset = Reg(BitUtil.GetBitRange(instruction, 0, 3));
+            }
+
+            uint address;
+            if (isUp)
+            {
+                address = nReg + offset;
+            }
+            else
+            {
+                address = nReg - offset;
+            }
+
+            uint effectiveAddress;
+            if (isPreIndex)
+            {
+                effectiveAddress = address;
+            }
+            else
+            {
+                effectiveAddress = nReg;
+            }
+
+            if (isWriteBack || !isPreIndex)
+            {
+                nReg = address;
+            }
+
+            int opType = BitUtil.GetBitRange(instruction, 5, 6);
+            InterpreterAssert(opType != 0b00, "SWP not handled here");
+
+            if (isLoad)
+            {
+                switch (opType)
+                {
+                    case 0b01:
+                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
+                        break;
+                    case 0b10:
+                        dReg = Cpu.MemoryMap.Read(effectiveAddress);
+
+                        if (BitUtil.IsBitSet(dReg, 7))
+                        {
+                            dReg |= 0xFFFFFF00;
+                        }
+
+                        break;
+                    case 0b11:
+                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
+
+                        if (BitUtil.IsBitSet(dReg, 15))
+                        {
+                            dReg |= 0xFFFF0000;
+                        }
+
+                        break;
+                }
+
+                if (dRegNum == PC)
+                {
+                    return 2 + 2 + 1; // 2S + 2N + 1I
+                }
+                else
+                {
+                    return 1 + 1 + 1; // 1S + 1N + 1I
+                }
+            }
+            else
+            {
+                InterpreterAssert(opType == 0b01, "LDRD/STRD not implemented");
+
+                Cpu.MemoryMap.WriteU16(effectiveAddress, (ushort)dReg);
+
+                return 2; // 2S
             }
         }
 
