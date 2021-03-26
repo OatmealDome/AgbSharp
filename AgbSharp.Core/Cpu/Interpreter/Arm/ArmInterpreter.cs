@@ -475,15 +475,66 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             bool setConditionCodes = BitUtil.IsBitSet(instruction, 20);
 
             bool isLong = false;
+
+            int m = 0;
+            int x = 0; 
+
+            void GetMBasedOnAllOnesOrZeros(uint reg)
+            {
+                if ((reg & 0xFFFFFF00) == 0xFFFFFF00 || (reg & 0xFFFFFF00) == 0x00000000)
+                {
+                    m = 1;
+                }
+                else if ((reg & 0xFFFF0000) == 0xFFFF0000 || (reg & 0xFFFF0000) == 0x00000000)
+                {
+                    m = 2;
+                }
+                else if ((reg & 0xFF000000) == 0xFF000000 || (reg & 0xFF000000) == 0x00000000)
+                {
+                    m = 3;
+                }
+                else
+                {
+                    m = 4;
+                }
+            }
+
+            void GetMBasedOnAllZeros(uint reg)
+            {
+                if ((reg & 0xFFFFFF00) == 0x00000000)
+                {
+                    m = 1;
+                }
+                else if ((reg & 0xFFFF0000) == 0x00000000)
+                {
+                    m = 2;
+                }
+                else if ((reg & 0xFF000000) == 0x00000000)
+                {
+                    m = 3;
+                }
+                else
+                {
+                    m = 4;
+                }
+            }
             
             int opcode = BitUtil.GetBitRange(instruction, 21, 24);
             switch (opcode)
             {
                 case 0b0000: // MUL
                     dReg = mReg * sReg;
+
+                    GetMBasedOnAllOnesOrZeros(sReg);
+
                     break;
                 case 0b0001: // MLA
                     dReg = (mReg * sReg) + nReg;
+
+                    GetMBasedOnAllOnesOrZeros(sReg);
+
+                    x = 1;
+
                     break;
                 case 0b0100: // UMULL
                     ulong umullResult = (ulong)mReg * sReg;
@@ -492,6 +543,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     nReg = (uint)(umullResult & 0xFFFFFFFF);
 
                     isLong = true;
+
+                    GetMBasedOnAllZeros(sReg);
+
+                    x = 1;
 
                     break;
                 case 0b0101: // UMLAL
@@ -504,6 +559,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     isLong = true;
 
+                    GetMBasedOnAllZeros(sReg);
+
+                    x = 1;
+
                     break;
                 case 0b0110: // SMULL
                     int mRegInt = (int)mReg;
@@ -514,6 +573,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     nReg = (uint)(smullResult & 0xFFFFFFFF);
 
                     isLong = true;
+
+                    GetMBasedOnAllOnesOrZeros(sReg);
+
+                    x = 2;
 
                     break;
                 case 0b0111: // SMLAL
@@ -527,6 +590,10 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     nReg = (uint)(smlalResult & 0xFFFFFFFF);
 
                     isLong = true;
+
+                    GetMBasedOnAllOnesOrZeros(sReg);
+
+                    x = 2;
 
                     break; 
             }
@@ -545,7 +612,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 CurrentStatus.Negative = BitUtil.IsBitSet(dReg, 31);
             }
 
-            return 0;
+            return 1 + (m + x); // 1S + (m + x)I
         }
 
         private int PsrOperation(uint instruction)
