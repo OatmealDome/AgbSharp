@@ -65,11 +65,17 @@ namespace AgbSharp.Core.Cpu
         }
 
         //
-        // Helper function
+        // Helper functions
         //
+
         private ref uint Reg(int reg)
         {
             return ref CurrentRegisterSet.GetRegister(reg);
+        }
+
+        public ref uint RegUser(int reg)
+        {
+            return ref RegisterSets[CpuMode.User].GetRegister(reg);
         }
 
         // Step the CPU by one instruction and return the cycles it took to execute
