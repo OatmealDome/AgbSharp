@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Interpreter.Arm;
+using AgbSharp.Core.Cpu.Interpreter.Thumb;
 using AgbSharp.Core.Cpu.Register;
 using AgbSharp.Core.Cpu.Status;
 using AgbSharp.Core.Memory;
@@ -44,7 +45,7 @@ namespace AgbSharp.Core.Cpu
         }
 
         private ArmInterpreter ArmInterpreter;
-        // private ThumbInterpreter ThumbInterpreter;
+        private ThumbInterpreter ThumbInterpreter;
 
         public AgbMemoryMap MemoryMap;
 
@@ -74,7 +75,7 @@ namespace AgbSharp.Core.Cpu
             CurrentStatus.Mode = CpuMode.User;
 
             ArmInterpreter = new ArmInterpreter(this);
-            // ThumbInterpreter = new ThumbInterpreter(this);
+            ThumbInterpreter = new ThumbInterpreter(this);
 
             MemoryMap = memoryMap;
         }
@@ -98,8 +99,7 @@ namespace AgbSharp.Core.Cpu
         {
             if (CurrentStatus.Thumb)
             {
-                // return ThumbInterpreter.Step();
-                return 0;
+                return ThumbInterpreter.Step();
             }
             else
             {
