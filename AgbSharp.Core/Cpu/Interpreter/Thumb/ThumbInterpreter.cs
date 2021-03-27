@@ -26,6 +26,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         return FormOneMoveShiftedRegister(instruction);
                     }
+                case 0b001:
+                    return FormThreeAluOperation(instruction);
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -100,6 +102,52 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
             CurrentStatus.Zero = dReg == 0;
             CurrentStatus.Negative = BitUtil.IsBitSet(dReg, 31);
+
+            return 1; // 1S
+        }
+
+        private int FormThreeAluOperation(uint instruction)
+        {
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+
+            uint immediate = (uint)BitUtil.GetBitRange(instruction, 0, 7);
+
+            uint result;
+
+            int opcode = BitUtil.GetBitRange(instruction, 11, 12);
+            switch (opcode)
+            {
+                case 0b00:
+                    result = immediate;
+                    break;
+                case 0b01:
+                case 0b11:
+                    result = dReg - immediate;
+
+                    SetCarryAndOverflowOnSubtraction(dReg, immediate, result, false);
+
+                    break;
+                case 0b10:
+                    result = dReg + immediate;
+
+                    SetCarryAndOverflowOnAddition(dReg, immediate, result);
+
+                    break;
+                default:
+                    InterpreterAssert($"Invalid opcode for Form Three (${opcode})");
+
+                    result = 0;
+
+                    break;
+            }
+
+            CurrentStatus.Zero = result == 0;
+            CurrentStatus.Negative = BitUtil.IsBitSet(result, 31);
+
+            if (opcode != 0b01) // CMP
+            {
+                dReg = result;
+            }
 
             return 1; // 1S
         }
