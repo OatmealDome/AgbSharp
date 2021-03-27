@@ -20,11 +20,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b000:
                     if (BitUtil.GetBitRange(instruction, 11, 12) == 0b11)
                     {
-                        return AddSubtractOperation(instruction);
+                        return FormTwoAddSubtractOperation(instruction);
                     }
                     else
                     {
-                        return MoveShiftedRegister(instruction);
+                        return FormOneMoveShiftedRegister(instruction);
                     }
             }
 
@@ -33,7 +33,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             return 0;
         }
 
-        private int MoveShiftedRegister(uint instruction)
+        private int FormOneMoveShiftedRegister(uint instruction)
         {
             ref uint sReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
             ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 2));
@@ -70,7 +70,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             return 1; // 1S
         }
 
-        private int AddSubtractOperation(uint instruction)
+        private int FormTwoAddSubtractOperation(uint instruction)
         {
             ref uint sReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
             ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 2));
