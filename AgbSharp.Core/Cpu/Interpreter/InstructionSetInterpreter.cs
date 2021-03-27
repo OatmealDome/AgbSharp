@@ -1,4 +1,5 @@
 using AgbSharp.Core.Cpu.Status;
+using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Cpu.Interpreter
 {
@@ -54,6 +55,102 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 throw new CpuException(message);
             }
         }
+
+        //
+        // Shift
+        //
+
+        protected uint PerformShift(ShiftType shiftType, uint operand, int shift, bool isZeroSpecialCase, bool setConditionCodes)
+        {
+            switch (shiftType)
+            {
+                case ShiftType.LogicalLeft: // LSL
+                    if (!isZeroSpecialCase)
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 32 - shift);
+                        }
+
+                        operand <<= shift;
+                    }
+
+                    break;
+                case ShiftType.LogicalRight: // LSR
+                    if (isZeroSpecialCase)
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
+                        }
+
+                        operand = 0;
+                    }
+                    else
+                    {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
+                        }
+
+                        operand >>= shift;
+                    }
+
+                    break;
+                case ShiftType.ArithmaticRight: // ASR
+                    if (isZeroSpecialCase)
+                    {
+                        if (BitUtil.IsBitSet(operand, 31))
+                        {
+                            operand = 0xFFFFFFFF;
+                        }
+                        else
+                        {
+                            operand = 0x00000000;
+                        }
+                    }
+                    else
+                    {
+                        // C# will do an ASR if the left operand is an int
+                        operand = (uint)((int)operand >> shift);
+                    }
+
+                    if (setConditionCodes)
+                    {
+                        CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
+                    }
+
+                    break;
+                case ShiftType.RotateRight: // ROR
+                    if (isZeroSpecialCase)
+                    {
+                        operand = BitUtil.RotateRight(operand, 1);
+
+                        if (CurrentStatus.Carry)
+                        {
+                            BitUtil.SetBit(ref operand, 31);
+                        }
+                        else
+                        {
+                            BitUtil.ClearBit(ref operand, 31);
+                        }
+                    }
+                    else
+                    {
+                        operand = BitUtil.RotateRight(operand, shift);
+
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
+                        }
+                    }
+
+                    break;
+            }
+
+            return operand;
+        }
+
 
         //
         // Interpreter must implement these

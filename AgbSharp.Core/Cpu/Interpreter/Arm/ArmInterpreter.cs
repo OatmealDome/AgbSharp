@@ -199,91 +199,31 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
 
             int shiftType = BitUtil.GetBitRange(instruction, 5, 6);
+            ShiftType shiftTypeEnum;
+
             switch (shiftType)
             {
-                case 0b00: // LSL
-                    if (!isZeroSpecialCase)
-                    {
-                        if (setConditionCodes)
-                        {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 32 - shift);
-                        }
-
-                        operand <<= shift;
-                    }
-
+                case 0b00:
+                    shiftTypeEnum = ShiftType.LogicalLeft;
                     break;
-                case 0b01: // LSR
-                    if (isZeroSpecialCase)
-                    {
-                        if (setConditionCodes)
-                        {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
-                        }
-
-                        operand = 0;
-                    }
-                    else
-                    {
-                        if (setConditionCodes)
-                        {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
-                        }
-
-                        operand >>= shift;
-                    }
-
+                case 0b01:
+                    shiftTypeEnum = ShiftType.LogicalRight;
                     break;
-                case 0b10: // ASR
-                    if (isZeroSpecialCase)
-                    {
-                        if (BitUtil.IsBitSet(operand, 31))
-                        {
-                            operand = 0xFFFFFFFF;
-                        }
-                        else
-                        {
-                            operand = 0x00000000;
-                        }
-                    }
-                    else
-                    {
-                        // C# will do an ASR if the left operand is an int
-                        operand = (uint)((int)operand >> shift);
-                    }
-
-                    if (setConditionCodes)
-                    {
-                        CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
-                    }
-
+                case 0b10:
+                    shiftTypeEnum = ShiftType.ArithmaticRight;
                     break;
-                case 0b11: // ROR
-                    if (isZeroSpecialCase)
-                    {
-                        operand = BitUtil.RotateRight(operand, 1);
+                case 0b11:
+                    shiftTypeEnum = ShiftType.RotateRight;
+                    break;
+                default:
+                    InterpreterAssert("Invalid shift type");
 
-                        if (CurrentStatus.Carry)
-                        {
-                            BitUtil.SetBit(ref operand, 31);
-                        }
-                        else
-                        {
-                            BitUtil.ClearBit(ref operand, 31);
-                        }
-                    }
-                    else
-                    {
-                        operand = BitUtil.RotateRight(operand, shift);
-
-                        if (setConditionCodes)
-                        {
-                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
-                        }
-                    }
+                    shiftTypeEnum = ShiftType.LogicalLeft;
 
                     break;
             }
+
+            operand = PerformShift(shiftTypeEnum, operand, shift, isZeroSpecialCase, setConditionCodes);
 
             return operand;
         }
