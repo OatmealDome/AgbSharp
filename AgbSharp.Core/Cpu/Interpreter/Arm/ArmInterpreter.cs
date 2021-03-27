@@ -398,46 +398,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             int m = 0;
             int x = 0; 
-
-            void GetMBasedOnAllOnesOrZeros(uint reg)
-            {
-                if ((reg & 0xFFFFFF00) == 0xFFFFFF00 || (reg & 0xFFFFFF00) == 0x00000000)
-                {
-                    m = 1;
-                }
-                else if ((reg & 0xFFFF0000) == 0xFFFF0000 || (reg & 0xFFFF0000) == 0x00000000)
-                {
-                    m = 2;
-                }
-                else if ((reg & 0xFF000000) == 0xFF000000 || (reg & 0xFF000000) == 0x00000000)
-                {
-                    m = 3;
-                }
-                else
-                {
-                    m = 4;
-                }
-            }
-
-            void GetMBasedOnAllZeros(uint reg)
-            {
-                if ((reg & 0xFFFFFF00) == 0x00000000)
-                {
-                    m = 1;
-                }
-                else if ((reg & 0xFFFF0000) == 0x00000000)
-                {
-                    m = 2;
-                }
-                else if ((reg & 0xFF000000) == 0x00000000)
-                {
-                    m = 3;
-                }
-                else
-                {
-                    m = 4;
-                }
-            }
             
             int opcode = BitUtil.GetBitRange(instruction, 21, 24);
             switch (opcode)
@@ -445,13 +405,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 case 0b0000: // MUL
                     dReg = mReg * sReg;
 
-                    GetMBasedOnAllOnesOrZeros(sReg);
+                    m = GetMBasedOnAllOnesOrZerosForMultiply(sReg);
 
                     break;
                 case 0b0001: // MLA
                     dReg = (mReg * sReg) + nReg;
 
-                    GetMBasedOnAllOnesOrZeros(sReg);
+                    m = GetMBasedOnAllOnesOrZerosForMultiply(sReg);
 
                     x = 1;
 
@@ -464,7 +424,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     isLong = true;
 
-                    GetMBasedOnAllZeros(sReg);
+                    m = GetMBasedOnAllZerosForMultiply(sReg);
 
                     x = 1;
 
@@ -479,7 +439,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     isLong = true;
 
-                    GetMBasedOnAllZeros(sReg);
+                    m = GetMBasedOnAllZerosForMultiply(sReg);
 
                     x = 1;
 
@@ -494,7 +454,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     isLong = true;
 
-                    GetMBasedOnAllOnesOrZeros(sReg);
+                    m = GetMBasedOnAllOnesOrZerosForMultiply(sReg);
 
                     x = 2;
 
@@ -511,7 +471,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     isLong = true;
 
-                    GetMBasedOnAllOnesOrZeros(sReg);
+                    m = GetMBasedOnAllOnesOrZerosForMultiply(sReg);
 
                     x = 2;
 

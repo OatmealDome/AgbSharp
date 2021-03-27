@@ -182,6 +182,50 @@ namespace AgbSharp.Core.Cpu.Interpreter
         }
 
         //
+        // Multiply helpers
+        //
+
+        protected int GetMBasedOnAllOnesOrZerosForMultiply(uint reg)
+        {
+            if ((reg & 0xFFFFFF00) == 0xFFFFFF00 || (reg & 0xFFFFFF00) == 0x00000000)
+            {
+                return 1;
+            }
+            else if ((reg & 0xFFFF0000) == 0xFFFF0000 || (reg & 0xFFFF0000) == 0x00000000)
+            {
+                return 2;
+            }
+            else if ((reg & 0xFF000000) == 0xFF000000 || (reg & 0xFF000000) == 0x00000000)
+            {
+                return 3;
+            }
+            else
+            {
+                return 4;
+            }
+        }
+
+        protected int GetMBasedOnAllZerosForMultiply(uint reg)
+        {
+            if ((reg & 0xFFFFFF00) == 0x00000000)
+            {
+                return 1;
+            }
+            else if ((reg & 0xFFFF0000) == 0x00000000)
+            {
+                return 2;
+            }
+            else if ((reg & 0xFF000000) == 0x00000000)
+            {
+                return 3;
+            }
+            else
+            {
+                return 4;
+            }
+        }
+
+        //
         // Interpreter must implement these
         //
 
