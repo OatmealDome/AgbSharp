@@ -52,6 +52,39 @@ namespace AgbSharp.Core.Tests.Cpu
 
             return cpu;
         }
+
+        public static void RunCpu(AgbCpu cpu, ushort[] instructions, bool littleEndian = false)
+        {
+            cpu.CurrentStatus.Thumb = true;
+
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                ushort instruction = instructions[i];
+
+                if (!littleEndian)
+                {
+                    instruction = ByteUtil.Swap16(instruction);
+                }
+
+                cpu.MemoryMap.WriteU16(InternalWramRegion.REGION_START + (uint)i * 2, instruction);
+            }
+
+            cpu.CurrentRegisterSet.GetRegister(PC) = InternalWramRegion.REGION_START;
+
+            for (int i = 0; i < instructions.Length; i++)
+            {
+                cpu.Step();
+            }
+        }
+
+        public static AgbCpu CreateAndRunCpu(ushort[] instructions, bool littleEndian = false)
+        {
+            AgbCpu cpu = CreateCpu();
+
+            RunCpu(cpu, instructions, littleEndian);
+
+            return cpu;
+        }
         
     }
 }
