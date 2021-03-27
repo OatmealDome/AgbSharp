@@ -151,6 +151,35 @@ namespace AgbSharp.Core.Cpu.Interpreter
             return operand;
         }
 
+        //
+        // Addition/Subtraction helpers
+        //
+        // Thanks to mGBA for easy shortcuts.
+        // include/mgba/internal/arm/isa-inlines.h
+        //
+        // Additional notes on Overflow flag:
+        // http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
+        //
+
+        protected void SetCarryAndOverflowOnAddition(uint first, uint second, uint result)
+        {
+            CurrentStatus.Carry = (BitUtil.GetBit(first, 31) + BitUtil.GetBit(second, 31)) > BitUtil.GetBit(result, 31);
+            CurrentStatus.Overflow = !BitUtil.IsBitSet(first ^ second, 31) && BitUtil.IsBitSet(first ^ result, 31);
+        }
+
+        protected void SetCarryAndOverflowOnSubtraction(uint first, uint second, uint result, bool carry)
+        {
+            if (carry)
+            {
+                CurrentStatus.Carry = first >= (second + (CurrentStatus.Carry ? 0 : 1));
+            }
+            else
+            {
+                CurrentStatus.Carry = first >= second;
+            }
+
+            CurrentStatus.Overflow = BitUtil.IsBitSet(first ^ second, 31) && BitUtil.IsBitSet(first ^ result, 31);
+        }
 
         //
         // Interpreter must implement these

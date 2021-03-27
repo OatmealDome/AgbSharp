@@ -274,15 +274,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             uint secondOperand = GetSecondOperandForAluOperation(instruction, setConditionCodes);
 
             uint result;
-            
-            //
-            // Thanks to mGBA for easy shortcuts.
-            // include/mgba/internal/arm/isa-inlines.h
-            //
-            // Additional notes on Overflow flag:
-            // http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-            //
-
             void SetCarryAndOverflowOnAddition(uint first, uint second)
             {
                 if (!setConditionCodes)
@@ -290,8 +281,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     return;
                 }
 
-                CurrentStatus.Carry = (BitUtil.GetBit(first, 31) + BitUtil.GetBit(second, 31)) > BitUtil.GetBit(result, 31);
-                CurrentStatus.Overflow = !BitUtil.IsBitSet(first ^ second, 31) && BitUtil.IsBitSet(first ^ result, 31);
+                this.SetCarryAndOverflowOnAddition(first, second, result);
             }
 
             void SetCarryAndOverflowOnSubtraction(uint first, uint second, bool carry)
@@ -301,18 +291,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     return;
                 }
 
-                if (carry)
-                {
-                    CurrentStatus.Carry = first >= (second + (CurrentStatus.Carry ? 0 : 1));
-                }
-                else
-                {
-                    CurrentStatus.Carry = first >= second;
-                }
-
-                CurrentStatus.Overflow = BitUtil.IsBitSet(first ^ second, 31) && BitUtil.IsBitSet(first ^ result, 31);
+                this.SetCarryAndOverflowOnSubtraction(first, second, result, carry);
             }
-
 
             int opcode = BitUtil.GetBitRange(instruction, 21, 24);
             switch (opcode)
