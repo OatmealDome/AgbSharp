@@ -18,7 +18,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             switch (type)
             {
                 case 0b000:
-                    return MoveShiftedRegister(instruction);
+                    if (BitUtil.GetBitRange(instruction, 11, 12) == 0b11)
+                    {
+                        return AddSubtractOperation(instruction);
+                    }
+                    else
+                    {
+                        return MoveShiftedRegister(instruction);
+                    }
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -56,6 +63,40 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             }
 
             dReg = PerformShift(shiftTypeEnum, sReg, shift, shift == 0, true);
+
+            CurrentStatus.Zero = dReg == 0;
+            CurrentStatus.Negative = BitUtil.IsBitSet(dReg, 31);
+
+            return 1; // 1S
+        }
+
+        private int AddSubtractOperation(uint instruction)
+        {
+            ref uint sReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 2));
+
+            uint operand;
+            if (BitUtil.IsBitSet(instruction, 10)) // immediate
+            {
+                operand = (uint)BitUtil.GetBitRange(instruction, 6, 8);
+            }
+            else
+            {
+                operand = Reg(BitUtil.GetBitRange(instruction, 6, 8));
+            }
+
+            if (BitUtil.IsBitSet(instruction, 9)) // subtraction
+            {
+                dReg = sReg - operand;
+
+                SetCarryAndOverflowOnSubtraction(sReg, operand, dReg, false);
+            }
+            else
+            {
+                dReg = sReg + operand;
+
+                SetCarryAndOverflowOnAddition(sReg, operand, dReg);
+            }
 
             CurrentStatus.Zero = dReg == 0;
             CurrentStatus.Negative = BitUtil.IsBitSet(dReg, 31);
