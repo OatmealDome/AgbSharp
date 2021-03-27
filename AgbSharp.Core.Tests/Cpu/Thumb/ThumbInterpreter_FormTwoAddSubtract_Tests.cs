@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AgbSharp.Core.Tests.Cpu.Thumb
 {
-    public class ThumbInterpreter_AddSubtract_Tests
+    public class ThumbInterpreter_FormTwoAddSubtract_Tests
     {
         [Fact]
         public void Add_RegTwoAndRegOne_RegZeroCorrect()

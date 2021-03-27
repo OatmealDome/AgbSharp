@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AgbSharp.Core.Tests.Cpu.Thumb
 {
-    public class ThumbInterpreter_ShiftedRegister_Tests
+    public class ThumbInterpreter_FormOneShiftedRegister_Tests
     {
         [Fact]
         public void ShiftedRegister_LslRegOneWithResultInRegZero_RegZeroCorrect()
