@@ -31,7 +31,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b010:
                     if (BitUtil.IsBitSet(instruction, 12))
                     {
-                        // TODO: Form Seven and Form Eight
+                        // TODO: Form Eight
+
+                        return FormSevenLoadStore(instruction);
                     }
                     else if (BitUtil.IsBitSet(instruction, 11))
                     {
@@ -45,8 +47,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         return FormFourAluOperation(instruction);
                     }
-
-                    break;
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -355,5 +355,48 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             return 1 + 1 + 1; // 1S + 1N + 1I
         }
 
+        private int FormSevenLoadStore(uint instruction)
+        {
+            ref uint oReg = ref Reg(BitUtil.GetBitRange(instruction, 6, 8));
+            ref uint bReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 2));
+
+            bool isLoad = false;
+
+            uint address = bReg + oReg;
+
+            int opcode = BitUtil.GetBitRange(instruction, 10, 11);
+            switch (opcode)
+            {
+                case 0b00:
+                    Cpu.MemoryMap.WriteU32(address, dReg);
+                    break;
+                case 0b01:
+                    Cpu.MemoryMap.Write(address, (byte)(dReg & 0xFF));
+                    break;
+                case 0b10:
+                    dReg = Cpu.MemoryMap.ReadU32(address);
+
+                    isLoad = true;
+
+                    break;
+                case 0b11:
+                    dReg = Cpu.MemoryMap.Read(address);
+
+                    isLoad = true;
+
+                    break;
+            }
+
+            if (isLoad)
+            {
+                return 1 + 1 + 1; // 1S + 1N + 1I
+            }
+            else
+            {
+                return 2; // 2S;
+            }
+        }
+        
     }
 }
