@@ -63,7 +63,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                         switch (subtype)
                         {
-                            // TODO
+                            case 0b00:
+                                return FormThirteenAddSpOffset(instruction);
                         }
                     }
                     else
@@ -565,6 +566,25 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                 dReg = pc + offset;
             }
+
+            return 1; // 1S
+        }
+
+        private int FormThirteenAddSpOffset(uint instruction)
+        {
+            uint offset = (uint)BitUtil.GetBitRange(instruction, 0, 6) * 4;
+
+            uint sp = Reg(SP);
+            if (BitUtil.IsBitSet(instruction, 7))
+            {
+                sp -= offset;
+            }
+            else
+            {
+                sp += offset;
+            }
+
+            Reg(SP) = sp;
 
             return 1; // 1S
         }
