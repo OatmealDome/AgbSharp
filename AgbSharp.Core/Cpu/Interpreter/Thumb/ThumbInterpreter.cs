@@ -56,6 +56,22 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         return FormTenLoadStore(instruction);
                     }
+                case 0b101:
+                    if (BitUtil.IsBitSet(instruction, 12))
+                    {
+                        int subtype = BitUtil.GetBitRange(instruction, 9, 10);
+
+                        switch (subtype)
+                        {
+                            // TODO
+                        }
+                    }
+                    else
+                    {
+                        return FormTwelveAddPcSp(instruction);
+                    }
+
+                    break;
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -533,5 +549,25 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             }
         }
         
+        private int FormTwelveAddPcSp(uint instruction)
+        {
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+
+            uint offset = (uint)BitUtil.GetBitRange(instruction, 0, 7) * 4;
+
+            if (BitUtil.IsBitSet(instruction, 11)) // ADD Rd, SP, #imm
+            {
+                dReg = Reg(SP) + offset;
+            }
+            else // ADD Rd, PC, #imm
+            {
+                uint pc = (uint)((Reg(PC) + 2) & ~2);
+
+                dReg = pc + offset;
+            }
+
+            return 1; // 1S
+        }
+
     }
 }
