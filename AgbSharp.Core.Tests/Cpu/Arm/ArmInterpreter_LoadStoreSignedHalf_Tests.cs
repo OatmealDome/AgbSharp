@@ -200,6 +200,25 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0xFFFF8000, cpu.CurrentRegisterSet.GetRegister(0));
             Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(1));
         }
+
+        [Fact]
+        public void StoreHalf_UsingAddressInRegOne_StoreSuccess()
+        {
+            const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
+
+            AgbCpu cpu = CpuUtil.CreateCpu();
+
+            cpu.CurrentRegisterSet.GetRegister(0) = 0xFFFFCAFE;
+            cpu.CurrentRegisterSet.GetRegister(1) = targetAddress;
+
+            CpuUtil.RunCpu(cpu, new uint[]
+            {
+                0xB000C1E1 // STRH r0, [r1]
+            }, true);
+
+            Assert.Equal((uint)0x0000CAFE, cpu.MemoryMap.ReadU16(targetAddress));
+            Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(1));
+        }
         
     }
 }
