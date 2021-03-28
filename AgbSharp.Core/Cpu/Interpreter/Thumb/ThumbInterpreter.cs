@@ -48,7 +48,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b011:
                     return FormNineLoadStore(instruction);
                 case 0b100:
-                    return FormTenLoadStore(instruction);
+                    if (BitUtil.IsBitSet(instruction, 12))
+                    {
+                        return FormElevenLoadStore(instruction);
+                    }
+                    else
+                    {
+                        return FormTenLoadStore(instruction);
+                    }
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -500,6 +507,27 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             else
             {
                 Cpu.MemoryMap.WriteU16(address, (ushort)(dReg & 0xFFFF));
+
+                return 2; // 2S
+            }
+        }
+
+        private int FormElevenLoadStore(uint instruction)
+        {
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+
+            uint offset = (uint)BitUtil.GetBitRange(instruction, 0, 7);
+            uint address = Reg(SP) + (offset * 4);
+
+            if (BitUtil.IsBitSet(instruction, 11))
+            {
+                dReg = Cpu.MemoryMap.ReadU32(address);
+
+                return 1 + 1 + 1; // 1S + 1N + 1I
+            }
+            else
+            {
+                Cpu.MemoryMap.WriteU32(address, dReg);
 
                 return 2; // 2S
             }
