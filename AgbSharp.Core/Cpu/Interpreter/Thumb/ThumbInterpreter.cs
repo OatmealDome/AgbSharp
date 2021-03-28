@@ -31,9 +31,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b010:
                     if (BitUtil.IsBitSet(instruction, 12))
                     {
-                        // TODO: Form Eight
-
-                        return FormSevenLoadStore(instruction);
+                        return FormSevenEightLoadStore(instruction);
                     }
                     else if (BitUtil.IsBitSet(instruction, 11))
                     {
@@ -355,7 +353,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             return 1 + 1 + 1; // 1S + 1N + 1I
         }
 
-        private int FormSevenLoadStore(uint instruction)
+        private int FormSevenEightLoadStore(uint instruction)
         {
             ref uint oReg = ref Reg(BitUtil.GetBitRange(instruction, 6, 8));
             ref uint bReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
@@ -366,26 +364,67 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             uint address = bReg + oReg;
 
             int opcode = BitUtil.GetBitRange(instruction, 10, 11);
-            switch (opcode)
+
+            if (BitUtil.IsBitSet(instruction, 9)) // Form Eight (half-words and sign extension)
             {
-                case 0b00:
-                    Cpu.MemoryMap.WriteU32(address, dReg);
-                    break;
-                case 0b01:
-                    Cpu.MemoryMap.Write(address, (byte)(dReg & 0xFF));
-                    break;
-                case 0b10:
-                    dReg = Cpu.MemoryMap.ReadU32(address);
+                switch (opcode)
+                {
+                    case 0b00: // STRH
+                        Cpu.MemoryMap.WriteU16(address, (ushort)(dReg & 0xFFFF));
+                        break;
+                    case 0b01: // LDSB
+                        dReg = Cpu.MemoryMap.Read(address);
 
-                    isLoad = true;
+                        if (BitUtil.IsBitSet(dReg, 7))
+                        {
+                            dReg |= 0xFFFFFF00;
+                        }
 
-                    break;
-                case 0b11:
-                    dReg = Cpu.MemoryMap.Read(address);
+                        isLoad = true;
 
-                    isLoad = true;
+                        break;
+                    case 0b10: // LDRH
+                        dReg = Cpu.MemoryMap.ReadU16(address);
 
-                    break;
+                        isLoad = true;
+
+                        break;
+                    case 0b11: // LDSH
+                        dReg = Cpu.MemoryMap.ReadU16(address);
+
+                        if (BitUtil.IsBitSet(dReg, 15))
+                        {
+                            dReg |= 0xFFFF0000;
+                        }
+
+                        isLoad = true;
+
+                        break;
+                }
+            }
+            else
+            {
+                switch (opcode)
+                {
+                    case 0b00: // STR
+                        Cpu.MemoryMap.WriteU32(address, dReg);
+                        break;
+                    case 0b01: // STRB
+                        Cpu.MemoryMap.Write(address, (byte)(dReg & 0xFF));
+                        break;
+                    case 0b10: // LDR
+                        dReg = Cpu.MemoryMap.ReadU32(address);
+
+                        isLoad = true;
+
+                        break;
+                    case 0b11: // LDRB
+                        dReg = Cpu.MemoryMap.Read(address);
+
+                        isLoad = true;
+
+                        break;
+                }
             }
 
             if (isLoad)
