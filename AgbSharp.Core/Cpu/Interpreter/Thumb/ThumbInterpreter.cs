@@ -29,7 +29,24 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b001:
                     return FormThreeAluOperation(instruction);
                 case 0b010:
-                    return FormFourAluOperation(instruction);
+                    if (BitUtil.IsBitSet(instruction, 12))
+                    {
+                        // TODO: Form Seven and Form Eight
+                    }
+                    else if (BitUtil.IsBitSet(instruction, 11))
+                    {
+                        // TODO: Form Six
+                    }
+                    else if (BitUtil.IsBitSet(instruction, 10))
+                    {
+                        return FormFiveRegisterOperations(instruction);
+                    }
+                    else
+                    {
+                        return FormFourAluOperation(instruction);
+                    }
+
+                    break;
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -260,6 +277,69 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             CurrentStatus.Negative = BitUtil.IsBitSet(result, 31);
 
             return 1 + m; // 1S + mI
+        }
+
+        private int FormFiveRegisterOperations(uint instruction)
+        {
+            int sRegNum = (BitUtil.GetBit(instruction, 6) << 3) | BitUtil.GetBitRange(instruction, 3, 5);
+            ref uint sReg = ref Reg(sRegNum);
+
+            int dRegNum = (BitUtil.GetBit(instruction, 7) << 3) | BitUtil.GetBitRange(instruction, 0, 2);
+            ref uint dReg = ref Reg(dRegNum);
+
+            int opcode = BitUtil.GetBitRange(instruction, 8, 9);
+            switch (opcode)
+            {
+                case 0b00: // ADD
+                    // GBATEK says that this operation does not affect CPSR
+                    dReg = dReg + sReg;
+
+                    break;
+                case 0b01: // CMP
+                    uint result = dReg - sReg;
+
+                    SetCarryAndOverflowOnSubtraction(dReg, sReg, result, false);
+                    
+                    break;
+                case 0b10:
+                    dReg = sReg;
+                    break;
+                case 0b11:
+                    uint newPc;
+                    if (sRegNum == PC)
+                    {
+                        newPc = (uint)((Reg(PC) + 2) & ~2);
+                    }
+                    else
+                    {
+                        newPc = sReg;
+                    }
+
+                    if (!BitUtil.IsBitSet((uint)sRegNum, 0) || sRegNum == PC)
+                    {
+                        CurrentStatus.Thumb = false;
+                    }
+
+                    Reg(PC) = newPc;
+
+                    break;
+            }
+
+            if (opcode == 0b01)
+            {
+                return 1; // 1S
+            }
+            else
+            {
+                if (opcode == 0b11 || dReg == PC)
+                {
+                    return 2 + 1; // 2S + 1N
+                }
+                else
+                {
+                    return 1; // 1S
+                }
+            }
         }
 
     }
