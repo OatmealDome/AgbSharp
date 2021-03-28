@@ -35,7 +35,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     }
                     else if (BitUtil.IsBitSet(instruction, 11))
                     {
-                        // TODO: Form Six
+                        return FormSixPcRelativeLoad(instruction);
                     }
                     else if (BitUtil.IsBitSet(instruction, 10))
                     {
@@ -340,6 +340,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     return 1; // 1S
                 }
             }
+        }
+
+        private int FormSixPcRelativeLoad(uint instruction)
+        {
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+
+            uint pc = (uint)((Reg(PC) + 2) & ~2);
+
+            int offset = BitUtil.GetBitRange(instruction, 0, 7) * 4;
+
+            dReg = Cpu.MemoryMap.ReadU32(pc + (uint)offset);
+
+            return 1 + 1 + 1; // 1S + 1N + 1I
         }
 
     }
