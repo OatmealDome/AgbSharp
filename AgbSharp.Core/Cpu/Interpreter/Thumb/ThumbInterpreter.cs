@@ -65,6 +65,15 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                         {
                             case 0b00:
                                 return FormThirteenAddSpOffset(instruction);
+                            case 0b10:
+                                if (BitUtil.IsBitSet(instruction, 11))
+                                {
+                                    return FormFourteenPopOperation(instruction);
+                                }
+                                else
+                                {
+                                    return FormFourteenPushOperation(instruction);
+                                }
                         }
                     }
                     else
@@ -587,6 +596,42 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             Reg(SP) = sp;
 
             return 1; // 1S
+        }
+
+        private int FormFourteenPushOperation(uint instruction)
+        {
+            uint bitfield = instruction & 0xFF;
+
+            if (BitUtil.IsBitSet(instruction, 8)) // PUSH LR
+            {
+                BitUtil.SetBit(ref bitfield, LR);
+            }
+
+            int transferredWords = PerformDataBlockTransfer(ref Reg(SP), true, false, true, false, false, bitfield);
+
+            return (transferredWords - 1) + 2; // (n - 1)S + 2N
+        }
+
+        private int FormFourteenPopOperation(uint instruction)
+        {
+            uint bitfield = instruction & 0xFF;
+
+            bool popPc = BitUtil.IsBitSet(instruction, 8); // POP PC
+            if (popPc)
+            {
+                BitUtil.SetBit(ref bitfield, PC);
+            }
+
+            int transferredWords = PerformDataBlockTransfer(ref Reg(SP), false, true, true, true, false, bitfield);
+
+            if (popPc)
+            {
+                return (transferredWords + 1) + 2 + 1; // (n + 1)S + 2N + 1I
+            }
+            else
+            {
+                return transferredWords + 1 + 1; // nS + 1N + 1I
+            }
         }
 
     }
