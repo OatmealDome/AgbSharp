@@ -226,6 +226,88 @@ namespace AgbSharp.Core.Cpu.Interpreter
         }
 
         //
+        // Data Block Transfer (STM / LDM) Helpers
+        //
+
+        protected int PerformDataBlockTransfer(ref uint nReg, bool isPreIndex, bool isUp, bool isWriteBack, bool isLoad, bool useUserBank, uint regBitfield)
+        {
+            int transferredWords = 0;
+
+            for (int i = 0; i < 16; i++)
+            {
+                int regNum;
+
+                if (isPreIndex && !isUp)
+                {
+                    regNum = 15 - i;
+                }
+                else
+                {
+                    regNum = i;
+                }
+
+                if (!BitUtil.IsBitSet(regBitfield, regNum))
+                {
+                    continue;
+                }
+
+                uint address;
+                if (isUp)
+                {
+                    address = nReg + 4;
+                }
+                else
+                {
+                    address = nReg - 4;
+                }
+
+                uint effectiveAddress;
+                if (isPreIndex)
+                {
+                    effectiveAddress = address;
+                }
+                else
+                {
+                    effectiveAddress = nReg;
+                }
+
+                if (isLoad)
+                {
+                    uint value = Cpu.MemoryMap.ReadU32(effectiveAddress);
+
+                    if (useUserBank)
+                    {
+                        Cpu.RegUser(regNum) = value;
+                    }
+                    else
+                    {
+                        Reg(regNum) = value;
+                    }
+                }
+                else
+                {
+                    if (useUserBank)
+                    {
+                        Cpu.MemoryMap.WriteU32(effectiveAddress, Cpu.RegUser(regNum));
+                    }
+                    else
+                    {
+                        Cpu.MemoryMap.WriteU32(effectiveAddress, Reg(regNum));
+                    }
+                }
+
+                if (isWriteBack || !isPreIndex)
+                {
+                    nReg = address;
+                }
+
+                transferredWords++;
+            }
+
+            return transferredWords;
+        }
+
+        //
         // Interpreter must implement these
         //
 

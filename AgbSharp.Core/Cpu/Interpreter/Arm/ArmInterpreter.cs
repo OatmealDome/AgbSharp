@@ -766,78 +766,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 useUserBank = true;
             }
 
-            int transferredWords = 0;
+            uint bitfield = instruction & 0xFFFF;
 
-            for (int i = 0; i < 16; i++)
-            {
-                int regNum;
-
-                if (isPreIndex && !isUp)
-                {
-                    regNum = 15 - i;
-                }
-                else
-                {
-                    regNum = i;
-                }
-
-                if (!BitUtil.IsBitSet(instruction, regNum))
-                {
-                    continue;
-                }
-
-                uint address;
-                if (isUp)
-                {
-                    address = nReg + 4;
-                }
-                else
-                {
-                    address = nReg - 4;
-                }
-
-                uint effectiveAddress;
-                if (isPreIndex)
-                {
-                    effectiveAddress = address;
-                }
-                else
-                {
-                    effectiveAddress = nReg;
-                }
-
-                if (isLoad)
-                {
-                    uint value = Cpu.MemoryMap.ReadU32(effectiveAddress);
-
-                    if (useUserBank)
-                    {
-                        Cpu.RegUser(regNum) = value;
-                    }
-                    else
-                    {
-                        Reg(regNum) = value;
-                    }
-                }
-                else
-                {
-                    if (useUserBank)
-                    {
-                        Cpu.MemoryMap.WriteU32(effectiveAddress, Cpu.RegUser(regNum));
-                    }
-                    else
-                    {
-                        Cpu.MemoryMap.WriteU32(effectiveAddress, Reg(regNum));
-                    }
-                }
-
-                if (isWriteBack || !isPreIndex)
-                {
-                    nReg = address;
-                }
-
-                transferredWords++;
-            }
+            int transferredWords = PerformDataBlockTransfer(ref nReg, isPreIndex, isUp, isWriteBack, isLoad, useUserBank, bitfield);
 
             if (isLoad)
             {
