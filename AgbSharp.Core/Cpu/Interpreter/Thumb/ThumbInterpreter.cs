@@ -45,6 +45,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         return FormFourAluOperation(instruction);
                     }
+                case 0b011:
+                    return FormNineLoadStore(instruction);
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -425,6 +427,48 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                         break;
                 }
+            }
+
+            if (isLoad)
+            {
+                return 1 + 1 + 1; // 1S + 1N + 1I
+            }
+            else
+            {
+                return 2; // 2S;
+            }
+        }
+
+        private int FormNineLoadStore(uint instruction)
+        {
+            ref uint bReg = ref Reg(BitUtil.GetBitRange(instruction, 3, 5));
+            ref uint dReg = ref Reg(BitUtil.GetBitRange(instruction, 0, 2));
+
+            bool isLoad = false;
+
+            uint offset = (uint)BitUtil.GetBitRange(instruction, 6, 10);
+
+            int opcode = BitUtil.GetBitRange(instruction, 11, 12);
+            switch (opcode)
+            {
+                case 0b00: // STR
+                    Cpu.MemoryMap.WriteU32(bReg + (offset * 4), dReg);
+                    break;
+                case 0b01: // LDR
+                    dReg = Cpu.MemoryMap.ReadU32(bReg + (offset * 4));
+
+                    isLoad = true;
+
+                    break;
+                case 0b10: // STRB
+                    Cpu.MemoryMap.Write(bReg + offset, (byte)(dReg & 0xFF));
+                    break;
+                case 0b11: // LDRB
+                    dReg = Cpu.MemoryMap.Read(bReg + offset);
+
+                    isLoad = true;
+
+                    break;
             }
 
             if (isLoad)
