@@ -82,6 +82,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     }
 
                     break;
+                case 0b110:
+                    return FormFifteenBlockTransfer(instruction);
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -631,6 +633,26 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             else
             {
                 return transferredWords + 1 + 1; // nS + 1N + 1I
+            }
+        }
+
+        private int FormFifteenBlockTransfer(uint instruction)
+        {
+            ref uint bReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+
+            uint bitfield = instruction & 0xFF;
+
+            bool isLoad = BitUtil.IsBitSet(instruction, 11);
+
+            int transferredWords = PerformDataBlockTransfer(ref bReg, false, true, true, isLoad, false, bitfield);
+
+            if (isLoad)
+            {
+                return transferredWords + 1 + 1; // nS + 1N + 1I
+            }
+            else
+            {
+                return (transferredWords - 1) + 2; // (n - 1)S + 2N
             }
         }
 
