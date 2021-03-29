@@ -1,3 +1,4 @@
+using AgbSharp.Core.Cpu.Status;
 using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Cpu.Interpreter.Thumb
@@ -85,7 +86,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 case 0b110:
                     if (BitUtil.IsBitSet(instruction, 12))
                     {
-                        return FormSixteenConditionalBranch(instruction);
+                        if (BitUtil.GetBitRange(instruction, 8, 11) == 0b1111)
+                        {
+                            return FormSeventeenSwiOperation(instruction);
+                        }
+                        else 
+                        {
+                            return FormSixteenConditionalBranch(instruction);
+                        }
                     }
                     else
                     {
@@ -737,6 +745,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             {
                 return 1; // S
             }
+        }
+
+
+        private int FormSeventeenSwiOperation(uint instruction)
+        {
+            PerformSwi();
+
+            return 2 + 1; // 2S + 1N
         }
 
     }
