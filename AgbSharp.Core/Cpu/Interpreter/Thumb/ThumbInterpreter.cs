@@ -99,6 +99,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         return FormFifteenBlockTransfer(instruction);
                     }
+                case 0b111:
+                    return FormEighteenUnconditionalBranch(instruction);
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -747,10 +749,26 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             }
         }
 
-
         private int FormSeventeenSwiOperation(uint instruction)
         {
             PerformSwi();
+
+            return 2 + 1; // 2S + 1N
+        }
+
+        private int FormEighteenUnconditionalBranch(uint instruction)
+        {
+            uint offsetRaw = (uint)BitUtil.GetBitRange(instruction, 0, 10);
+
+            // Sign-extend
+            if (BitUtil.IsBitSet(offsetRaw, 10))
+            {
+                offsetRaw |= 0xFFFFF800;
+            }
+
+            int signedOffset = (int)offsetRaw;
+
+            Reg(PC) = (uint)(Reg(PC) + 2 + (signedOffset * 2));
 
             return 2 + 1; // 2S + 1N
         }
