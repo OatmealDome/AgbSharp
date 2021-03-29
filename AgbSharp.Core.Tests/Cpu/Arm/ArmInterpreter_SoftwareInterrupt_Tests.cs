@@ -1,5 +1,6 @@
 using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Cpu.Status;
+using AgbSharp.Core.Memory.Ram;
 using Xunit;
 
 namespace AgbSharp.Core.Tests.Cpu.Arm
@@ -19,7 +20,11 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             }, true);
 
             Assert.Equal(CpuMode.Supervisor, cpu.CurrentStatus.Mode);
+            Assert.False(cpu.CurrentStatus.Thumb);
+            Assert.True(cpu.CurrentStatus.IrqDisable);
+            Assert.True(cpu.CurrentStatus.FastIrqDisable);
             Assert.Equal((uint)0b11111000000000000000000011010000, cpu.CurrentSavedStatus.RegisterValue);
+            Assert.Equal(InternalWramRegion.REGION_START + 0x4, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
             Assert.Equal((uint)0x00000008, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC));
         }
 
