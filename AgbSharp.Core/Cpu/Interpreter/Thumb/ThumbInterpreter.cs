@@ -5,8 +5,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 {
     class ThumbInterpreter : InstructionSetInterpreter
     {
+        private uint HiBitsForLongBranch;
+
         public ThumbInterpreter(AgbCpu cpu) : base(cpu)
         {
+            HiBitsForLongBranch = 0;
         }
 
         public override int Step()
@@ -100,7 +103,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                         return FormFifteenBlockTransfer(instruction);
                     }
                 case 0b111:
-                    return FormEighteenUnconditionalBranch(instruction);
+                    int opcode = BitUtil.GetBitRange(instruction, 11, 12);
+
+                    switch (opcode)
+                    {
+                        case 0b00:
+                            return FormEighteenUnconditionalBranch(instruction);
+                        case 0b10:
+                            return FormNineteenLoadHiBits(instruction);
+                        case 0b11:
+                            return FormNineteenExecuteBranch(instruction);
+                    }
+
+                    break;
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -769,6 +784,28 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             int signedOffset = (int)offsetRaw;
 
             Reg(PC) = (uint)(Reg(PC) + 2 + (signedOffset * 2));
+
+            return 2 + 1; // 2S + 1N
+        }
+
+        private int FormNineteenLoadHiBits(uint instruction)
+        {
+            uint hiBits = (uint)BitUtil.GetBitRange(instruction, 0, 10);;
+
+            Reg(LR) = Reg(PC) + 2 + (hiBits << 12);
+
+            return 1; // 1S
+        }
+
+        private int FormNineteenExecuteBranch(uint instruction)
+        {
+            uint loBits = (uint)BitUtil.GetBitRange(instruction, 0, 10);
+
+            uint newLr = Reg(PC);
+
+            Reg(PC) = Reg(LR) + (loBits << 1);
+
+            Reg(LR) = newLr;
 
             return 2 + 1; // 2S + 1N
         }
