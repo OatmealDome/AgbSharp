@@ -308,6 +308,31 @@ namespace AgbSharp.Core.Cpu.Interpreter
         }
 
         //
+        // SWI helper
+        //
+
+        protected void PerformSwi()
+        {
+            uint previousPsr = CurrentStatus.RegisterValue;
+
+            // Enter Supervisor now so that we can access banked registers
+            CurrentStatus.Mode = CpuMode.Supervisor;
+
+            // SPSR_svc = CPSR (old)
+            SavedStatus.RegisterValue = previousPsr;
+
+            // LR_svc = PC
+            Reg(LR) = Reg(PC);
+
+            // Modify CPSR
+            CurrentStatus.Thumb = false;
+            CurrentStatus.IrqDisable = true;
+            CurrentStatus.FastIrqDisable = true;
+
+            Reg(PC) = 0x00000008;
+        }
+
+        //
         // Interpreter must implement these
         //
 
