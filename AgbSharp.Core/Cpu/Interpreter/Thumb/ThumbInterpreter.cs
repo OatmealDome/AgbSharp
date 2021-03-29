@@ -83,7 +83,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                     break;
                 case 0b110:
-                    return FormFifteenBlockTransfer(instruction);
+                    if (BitUtil.IsBitSet(instruction, 12))
+                    {
+                        return FormSixteenConditionalBranch(instruction);
+                    }
+                    else
+                    {
+                        return FormFifteenBlockTransfer(instruction);
+                    }
             }
 
             InterpreterAssert($"Invalid instruction ({instruction:x4})");
@@ -653,6 +660,82 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             else
             {
                 return (transferredWords - 1) + 2; // (n - 1)S + 2N
+            }
+        }
+
+        private int FormSixteenConditionalBranch(uint instruction)
+        {
+            uint offsetRaw = (uint)BitUtil.GetBitRange(instruction, 0, 7);
+
+            // Sign-extend
+            if (BitUtil.IsBitSet(offsetRaw, 7))
+            {
+                offsetRaw |= 0xFFFFFF00;
+            }
+
+            int offset = (int)offsetRaw;
+
+            bool condition = false;
+
+            int opcode = BitUtil.GetBitRange(instruction, 8, 11);
+            switch (opcode)
+            {
+                case 0:
+                    condition = CurrentStatus.Zero;
+                    break;
+                case 1:
+                    condition = !CurrentStatus.Zero;
+                    break;
+                case 2:
+                    condition = CurrentStatus.Carry;
+                    break;
+                case 3:
+                    condition = !CurrentStatus.Carry;
+                    break;
+                case 4:
+                    condition = CurrentStatus.Negative;
+                    break;
+                case 5:
+                    condition = !CurrentStatus.Negative;
+                    break;
+                case 6:
+                    condition = CurrentStatus.Overflow;
+                    break;
+                case 7:
+                    condition = !CurrentStatus.Overflow;
+                    break;
+                case 8:
+                    condition = CurrentStatus.Carry && !CurrentStatus.Zero;
+                    break;
+                case 9:
+                    condition = !CurrentStatus.Carry || CurrentStatus.Zero;
+                    break;
+                case 0xA:
+                    condition = CurrentStatus.Negative == CurrentStatus.Overflow;
+                    break;
+                case 0xB:
+                    condition = CurrentStatus.Negative != CurrentStatus.Overflow;
+                    break;
+                case 0xC:
+                    condition = !CurrentStatus.Zero && CurrentStatus.Negative == CurrentStatus.Overflow;
+                    break;
+                case 0xD:
+                    condition = CurrentStatus.Zero || CurrentStatus.Negative != CurrentStatus.Overflow;
+                    break;
+                default:
+                    InterpreterAssert($"Invalid condition for Branch ({opcode:x})");
+                    break;
+            }
+
+            if (condition)
+            {
+                Reg(PC) = (uint)(Reg(PC) + 2 + (offset * 2));
+
+                return 2 + 1; // 2S + 1N
+            }
+            else
+            {
+                return 1; // S
             }
         }
 
