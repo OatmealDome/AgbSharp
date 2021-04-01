@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AgbSharp.Core.Memory.Mmio;
 
 namespace AgbSharp.Core.Memory
 {

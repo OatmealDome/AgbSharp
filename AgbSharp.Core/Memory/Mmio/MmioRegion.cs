@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AgbSharp.Core.Memory
+namespace AgbSharp.Core.Memory.Mmio
 {
     internal class MmioRegion : IMemoryRegion
     {
