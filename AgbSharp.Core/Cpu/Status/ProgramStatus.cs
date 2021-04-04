@@ -3,7 +3,7 @@ using AgbSharp.Core.Util;
 namespace AgbSharp.Core.Cpu.Status
 {
     // CPSR and SPSR
-    class ProgramStatus
+    public class ProgramStatus
     {
         public bool Negative
         {

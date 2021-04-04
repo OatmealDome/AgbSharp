@@ -16,7 +16,7 @@ namespace AgbSharp.Core.Cpu
     // Some ARMv5+ instructions are implemented here as GBATEK documentation contains
     // information on both in one area.
     //
-    class AgbCpu
+    public class AgbCpu
     {
         // Constants to use with the Reg() helper
         private const int SP = 13;

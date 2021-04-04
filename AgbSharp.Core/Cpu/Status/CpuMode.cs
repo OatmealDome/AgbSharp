@@ -1,6 +1,6 @@
 namespace AgbSharp.Core.Cpu.Status
 {
-    enum CpuMode : byte
+    public enum CpuMode : byte
     {
         // Backwards compatibility (26-bit)
         OldUser = 0x00,

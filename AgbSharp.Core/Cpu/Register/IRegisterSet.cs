@@ -1,6 +1,6 @@
 namespace AgbSharp.Core.Cpu.Register
 {
-    interface IRegisterSet
+    public interface IRegisterSet
     {
         ref uint GetRegister(int reg);
 
