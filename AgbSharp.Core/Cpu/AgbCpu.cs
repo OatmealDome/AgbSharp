@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Interpreter.Arm;
 using AgbSharp.Core.Cpu.Interpreter.Thumb;
+using AgbSharp.Core.Cpu.Interrupt;
 using AgbSharp.Core.Cpu.Register;
 using AgbSharp.Core.Cpu.Status;
 using AgbSharp.Core.Memory;
+using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Cpu
 {
@@ -44,6 +46,11 @@ namespace AgbSharp.Core.Cpu
             }
         }
 
+        // Interrupts
+        private bool InterruptMasterEnable;
+        private uint EnabledInterrupts;
+        private uint AcknowledgedInterrupts;
+
         private ArmInterpreter ArmInterpreter;
         private ThumbInterpreter ThumbInterpreter;
 
@@ -74,10 +81,47 @@ namespace AgbSharp.Core.Cpu
             CurrentStatus = new ProgramStatus();
             CurrentStatus.Mode = CpuMode.User;
 
+            InterruptMasterEnable = true;
+            EnabledInterrupts = 0;
+            AcknowledgedInterrupts = 0;
+
             ArmInterpreter = new ArmInterpreter(this);
             ThumbInterpreter = new ThumbInterpreter(this);
 
             MemoryMap = memoryMap;
+
+            // Interrupts MMIO
+
+            memoryMap.RegisterMmio(0x4000208, () =>
+            {
+                return (byte)EnabledInterrupts;
+            }, (x) =>
+            {
+                EnabledInterrupts = x;
+            });
+
+            memoryMap.RegisterMmio16(0x4000200, () =>
+            {
+                uint b = 0;
+
+                if (InterruptMasterEnable)
+                {
+                    BitUtil.SetBit(ref b, 0);
+                }
+
+                return (ushort)b;
+            }, (x) =>
+            {
+                InterruptMasterEnable = BitUtil.IsBitSet(x, 0);
+            });
+
+            memoryMap.RegisterMmio(0x4000202, () =>
+            {
+                return (byte)AcknowledgedInterrupts;
+            }, (x) =>
+            {
+                AcknowledgedInterrupts = x;
+            });
         }
 
         //
@@ -105,6 +149,38 @@ namespace AgbSharp.Core.Cpu
             {
                 return ArmInterpreter.Step();
             }
+        }
+
+        public void RaiseInterrupt(InterruptType type)
+        {
+            if (CurrentStatus.IrqDisable)
+            {
+                return;
+            }
+
+            if (!InterruptMasterEnable)
+            {
+                return;
+            }
+
+            if (!BitUtil.IsBitSet(EnabledInterrupts, (int)type))
+            {
+                return;
+            }
+
+            BitUtil.SetBit(ref AcknowledgedInterrupts, (int)type);
+
+            uint lastPsr = CurrentStatus.RegisterValue;
+
+            CurrentStatus.Mode = CpuMode.Irq;
+            CurrentStatus.IrqDisable = true;
+            CurrentStatus.Thumb = false;
+
+            CurrentSavedStatus.RegisterValue = lastPsr;
+
+            Reg(LR) = Reg(PC);
+
+            Reg(PC) = 0x00000018; // IRQ vector
         }
 
     }
