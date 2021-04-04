@@ -230,6 +230,20 @@ namespace AgbSharp.Core.Ppu
             });
 
             #endregion
+        
+            #region VCOUNT
+
+            MemoryMap.RegisterMmio16(0x4000006, () =>
+            {
+                // Bit 8 unused on AGB, bits 9 to 15 unused on all platforms
+                
+                return (ushort)VerticalLine;
+            }, (x) =>
+            {
+                // Writes ignored
+            });
+
+            #endregion
         }
 
         public void Tick()

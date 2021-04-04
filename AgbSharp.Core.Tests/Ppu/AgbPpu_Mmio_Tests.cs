@@ -114,5 +114,23 @@ namespace AgbSharp.Core.Tests.Ppu
 
         #endregion
 
+        #region VCOUNT
+
+        [Fact]
+        public void Vcount_TickPpuToLine100_VcountCorrect()
+        {
+            AgbMemoryMap memoryMap = new AgbMemoryMap();
+
+            AgbPpu ppu = PpuUtil.CreatePpu(memoryMap);
+
+            PpuUtil.TickPpuByAmount(ppu, 100, 0);
+
+            memoryMap.UpdateMmio();
+
+            Assert.Equal(0x0064, memoryMap.ReadU16(0x4000006)); // V-Count flag
+        }
+
+        #endregion
+
     }
 }
