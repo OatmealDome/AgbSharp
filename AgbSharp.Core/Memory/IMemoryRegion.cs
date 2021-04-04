@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AgbSharp.Core.Memory
 {
-    interface IMemoryRegion
+    public interface IMemoryRegion
     {
         IEnumerable<Tuple<uint, uint>> GetHandledRanges();
 

@@ -19,7 +19,7 @@ namespace AgbSharp.Core.Memory
     // 0x0E000000 to .......... - Game Pak RAM (8-bit)
     //
 
-    class AgbMemoryMap
+    public class AgbMemoryMap
     {
         private readonly Dictionary<uint, IMemoryRegion> Map;
         private readonly List<IMmioRegion> MmioRegions;
