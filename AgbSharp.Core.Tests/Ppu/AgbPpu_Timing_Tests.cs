@@ -11,7 +11,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick67Dots_InRender()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 0, 67);
 
@@ -21,7 +21,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick68Dots_InHBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 0, 68);
 
@@ -31,7 +31,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick307Dots_InHBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 0, 307);
 
@@ -41,7 +41,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_TickOneLine_InRender()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 1, 0);
 
@@ -51,7 +51,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick159Lines_InRender()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 159, 0);
 
@@ -61,7 +61,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick159LinesAnd68Dots_InHBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 159, 68);
 
@@ -71,7 +71,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick160Lines_InVBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 160, 0);
 
@@ -81,7 +81,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick160LinesAnd68Dots_InVBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 160, 68);
 
@@ -91,7 +91,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick227Lines_InVBlank()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 227, 0);
 
@@ -101,7 +101,7 @@ namespace AgbSharp.Core.Tests.Ppu
         [Fact]
         public void Tick_Tick229Lines_InRender()
         {
-            AgbPpu ppu = new AgbPpu();
+            AgbPpu ppu = PpuUtil.CreatePpu();
 
             PpuUtil.TickPpuByAmount(ppu, 229, 0);
 
