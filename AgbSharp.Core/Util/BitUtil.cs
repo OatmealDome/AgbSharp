@@ -12,6 +12,12 @@ namespace AgbSharp.Core.Util
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetBit(byte b, int bit)
+        {
+            return (int)(b >> bit) & 0x1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBitRange(uint b, int start, int end)
         {
             int mask = (1 << (end - start + 1)) - 1;
@@ -26,6 +32,12 @@ namespace AgbSharp.Core.Util
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsBitSet(byte b, int bit)
+        {
+            return GetBit(b, bit) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetBit(ref uint b, int bit)
         {
             // for example, setting Carry on GbSharp CpuFlags:
@@ -33,6 +45,12 @@ namespace AgbSharp.Core.Util
             // mask 0001 0000
             // XOR  1001 0000
             b |= (uint)(1 << bit);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetBit(ref byte b, int bit)
+        {
+            b |= (byte)(1 << bit);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
