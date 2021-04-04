@@ -54,6 +54,12 @@ namespace AgbSharp.Core.Util
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetBit(ref ushort b, int bit)
+        {
+            b |= (ushort)(1 << bit);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ClearBit(ref uint b, int bit)
         {
             // for example, clearing Carry on GbSharp CpuFlags:
