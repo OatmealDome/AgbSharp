@@ -1,6 +1,7 @@
 using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Cpu.Interrupt;
 using AgbSharp.Core.Memory;
+using AgbSharp.Core.Memory.Ram;
 using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Ppu
@@ -37,6 +38,10 @@ namespace AgbSharp.Core.Ppu
         private int HorizontalDot;
         private int VerticalLine;
 
+        // VRAM
+        private PaletteRamRegion PaletteRam;
+        private VideoRamRegion VideoRam;
+
         // DISPCNT
         private int BackgroundMode;
         private bool CgbMode; // always false for AGB
@@ -68,6 +73,12 @@ namespace AgbSharp.Core.Ppu
 
             HorizontalDot = 0;
             VerticalLine = 0;
+
+            PaletteRam = new PaletteRamRegion();
+            memoryMap.RegisterRegion(PaletteRam);
+
+            VideoRam = new VideoRamRegion();
+            memoryMap.RegisterRegion(VideoRam);
 
             #region DISPCNT
 
