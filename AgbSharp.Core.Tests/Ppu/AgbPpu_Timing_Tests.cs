@@ -9,21 +9,21 @@ namespace AgbSharp.Core.Tests.Ppu
     public class AgbPpu_Timing_Tests
     {
         [Fact]
-        public void Tick_Tick67Dots_InRender()
+        public void Tick_Tick239Dots_InRender()
         {
             AgbPpu ppu = PpuUtil.CreatePpu();
 
-            PpuUtil.TickPpuByAmount(ppu, 0, 67);
+            PpuUtil.TickPpuByAmount(ppu, 0, 239);
 
             Assert.Equal(PpuState.Render, ppu.State);
         }
 
         [Fact]
-        public void Tick_Tick68Dots_InHBlank()
+        public void Tick_Tick240Dots_InHBlank()
         {
             AgbPpu ppu = PpuUtil.CreatePpu();
 
-            PpuUtil.TickPpuByAmount(ppu, 0, 68);
+            PpuUtil.TickPpuByAmount(ppu, 0, 240);
 
             Assert.Equal(PpuState.HBlank, ppu.State);
         }
@@ -59,11 +59,11 @@ namespace AgbSharp.Core.Tests.Ppu
         }
 
         [Fact]
-        public void Tick_Tick159LinesAnd68Dots_InHBlank()
+        public void Tick_Tick159LinesAnd240Dots_InHBlank()
         {
             AgbPpu ppu = PpuUtil.CreatePpu();
 
-            PpuUtil.TickPpuByAmount(ppu, 159, 68);
+            PpuUtil.TickPpuByAmount(ppu, 159, 240);
 
             Assert.Equal(PpuState.HBlank, ppu.State);
         }
@@ -79,11 +79,11 @@ namespace AgbSharp.Core.Tests.Ppu
         }
 
         [Fact]
-        public void Tick_Tick160LinesAnd68Dots_InVBlank()
+        public void Tick_Tick160LinesAnd240Dots_InVBlank()
         {
             AgbPpu ppu = PpuUtil.CreatePpu();
 
-            PpuUtil.TickPpuByAmount(ppu, 160, 68);
+            PpuUtil.TickPpuByAmount(ppu, 160, 240);
 
             Assert.Equal(PpuState.VBlank, ppu.State);
         }

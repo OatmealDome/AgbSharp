@@ -181,7 +181,7 @@ namespace AgbSharp.Core.Ppu
             switch (State)
             {
                 case PpuState.Render:
-                    if (HorizontalDot == 68)
+                    if (HorizontalDot == 240)
                     {
                         State = PpuState.HBlank;
                     }
