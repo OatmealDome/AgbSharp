@@ -1,3 +1,5 @@
+using AgbSharp.Core.Cpu;
+using AgbSharp.Core.Cpu.Interrupt;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Util;
 
@@ -6,6 +8,7 @@ namespace AgbSharp.Core.Ppu
     class AgbPpu
     {
         private readonly AgbMemoryMap MemoryMap;
+        private readonly AgbCpu Cpu;
 
         //
         // AGB PPU timing (from GBATEK):
@@ -56,9 +59,10 @@ namespace AgbSharp.Core.Ppu
         private bool VCountIrqEnable;
         private int VCountSetting;
 
-        public AgbPpu(AgbMemoryMap memoryMap)
+        public AgbPpu(AgbMemoryMap memoryMap, AgbCpu cpu)
         {
             MemoryMap = memoryMap;
+            Cpu = cpu;
 
             State = PpuState.Render;
 
@@ -236,7 +240,7 @@ namespace AgbSharp.Core.Ppu
             MemoryMap.RegisterMmio16(0x4000006, () =>
             {
                 // Bit 8 unused on AGB, bits 9 to 15 unused on all platforms
-                
+
                 return (ushort)VerticalLine;
             }, (x) =>
             {
@@ -255,20 +259,38 @@ namespace AgbSharp.Core.Ppu
 
             HorizontalDot++;
 
+            void IncrementVerticalLine()
+            {
+                HorizontalDot = 0;
+                VerticalLine++;
+
+                if (VCountIrqEnable)
+                {
+                    if (VCountSetting == VerticalLine)
+                    {
+                        Cpu?.RaiseInterrupt(InterruptType.VCounterMatch);
+                    }
+                }
+            }
+
             switch (State)
             {
                 case PpuState.Render:
                     if (HorizontalDot == 240)
                     {
                         State = PpuState.HBlank;
+
+                        if (HBlankIrqEnable)
+                        {
+                            Cpu?.RaiseInterrupt(InterruptType.HBlank);
+                        }
                     }
 
                     break;
                 case PpuState.HBlank:
                     if (HorizontalDot == 308)
                     {
-                        HorizontalDot = 0;
-                        VerticalLine++;
+                        IncrementVerticalLine();
 
                         State = PpuState.Render;
                     }
@@ -276,14 +298,18 @@ namespace AgbSharp.Core.Ppu
                     if (VerticalLine == 160)
                     {
                         State = PpuState.VBlank;
+
+                        if (VBlankIrqEnable)
+                        {
+                            Cpu?.RaiseInterrupt(InterruptType.VBlank);
+                        }
                     }
 
                     break;
                 case PpuState.VBlank:
                     if (HorizontalDot == 308)
                     {
-                        HorizontalDot = 0;
-                        VerticalLine++;
+                        IncrementVerticalLine();
                     }
 
                     if (VerticalLine == 228)

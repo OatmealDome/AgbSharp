@@ -1,3 +1,4 @@
+using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Ppu;
 
@@ -12,9 +13,9 @@ namespace AgbSharp.Core.Tests.Ppu
             return CreatePpu(memoryMap);
         }
 
-        public static AgbPpu CreatePpu(AgbMemoryMap memoryMap)
+        public static AgbPpu CreatePpu(AgbMemoryMap memoryMap, AgbCpu cpu = null)
         {
-            AgbPpu ppu = new AgbPpu(memoryMap);
+            AgbPpu ppu = new AgbPpu(memoryMap, cpu);
 
             return ppu;
         }

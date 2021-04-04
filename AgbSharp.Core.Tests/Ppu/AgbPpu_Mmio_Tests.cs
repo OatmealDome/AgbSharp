@@ -1,3 +1,5 @@
+using AgbSharp.Core.Cpu;
+using AgbSharp.Core.Cpu.Status;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Ppu;
 using Xunit;
@@ -110,6 +112,78 @@ namespace AgbSharp.Core.Tests.Ppu
             memoryMap.UpdateMmio();
 
             Assert.Equal(0x6404, memoryMap.ReadU16(0x4000004)); // V-Count flag
+        }
+
+        [Fact]
+        public void Dispstat_EnableVBlankIrqTickUntilVBlank_InterruptRequested()
+        {
+            AgbMemoryMap memoryMap = new AgbMemoryMap();
+
+            AgbCpu cpu = new AgbCpu(memoryMap);
+
+            AgbPpu ppu = PpuUtil.CreatePpu(memoryMap, cpu);
+
+            memoryMap.WriteU32(0x4000208, 0x01); // Interrupt Master Enable
+            memoryMap.WriteU16(0x4000200, 0x0001); // IE = V-Blank IRQ enabled
+            memoryMap.WriteU16(0x4000004, 0x0008); // DISPSTAT = V-Blank IRQ enabled
+
+            memoryMap.FlushMmio();
+
+            PpuUtil.TickPpuByAmount(ppu, 160, 0);
+
+            memoryMap.UpdateMmio();
+
+            Assert.Equal(0x0009, memoryMap.ReadU16(0x4000004)); // V-Blank flag, V-Blank IRQ enabled
+            Assert.Equal(0x0001, memoryMap.ReadU16(0x4000202)); // IF = V-Count
+            Assert.Equal(CpuMode.Irq, cpu.CurrentStatus.Mode);
+        }
+
+        [Fact]
+        public void Dispstat_EnableHBlankIrqAndTickUntilHBlank_InterruptRequested()
+        {
+            AgbMemoryMap memoryMap = new AgbMemoryMap();
+
+            AgbCpu cpu = new AgbCpu(memoryMap);
+
+            AgbPpu ppu = PpuUtil.CreatePpu(memoryMap, cpu);
+
+            memoryMap.WriteU32(0x4000208, 0x01); // Interrupt Master Enable
+            memoryMap.WriteU16(0x4000200, 0x0002); // IE = H-Blank IRQ enabled
+            memoryMap.WriteU16(0x4000004, 0xFF10); // DISPSTAT = H-Blank IRQ enabled, VCount = line 255
+
+            memoryMap.FlushMmio();
+
+            PpuUtil.TickPpuByAmount(ppu, 0, 240);
+
+            memoryMap.UpdateMmio();
+
+            Assert.Equal(0xFF12, memoryMap.ReadU16(0x4000004)); // H-Blank flag, H-Blank IRQ enabled
+            Assert.Equal(0x0002, memoryMap.ReadU16(0x4000202)); // IF = H-Count
+            Assert.Equal(CpuMode.Irq, cpu.CurrentStatus.Mode);
+        }
+
+        [Fact]
+        public void Dispstat_SetVCountAndEnableVCountIrqAndTickUntilVCountLine_InterruptRequested()
+        {
+            AgbMemoryMap memoryMap = new AgbMemoryMap();
+
+            AgbCpu cpu = new AgbCpu(memoryMap);
+
+            AgbPpu ppu = PpuUtil.CreatePpu(memoryMap, cpu);
+
+            memoryMap.WriteU32(0x4000208, 0x01); // Interrupt Master Enable
+            memoryMap.WriteU16(0x4000200, 0x0004); // IE = V-Count IRQ enabled
+            memoryMap.WriteU16(0x4000004, 0x6420); // DISPSTAT = V-Blank IRQ enabled, VCount = line 100
+
+            memoryMap.FlushMmio();
+
+            PpuUtil.TickPpuByAmount(ppu, 100, 0);
+
+            memoryMap.UpdateMmio();
+
+            Assert.Equal(0x6424, memoryMap.ReadU16(0x4000004)); // V-Count flag, V-Count IRQ enabled
+            Assert.Equal(0x0004, memoryMap.ReadU16(0x4000202)); // IF = V-Count
+            Assert.Equal(CpuMode.Irq, cpu.CurrentStatus.Mode);
         }
 
         #endregion
