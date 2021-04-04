@@ -52,6 +52,16 @@ namespace AgbSharp.Core.Memory
             MmioRegions.Add(region);
         }
 
+        public void RegisterMmio16(uint address, Func<ushort> readFunc, Action<ushort> writeFunc)
+        {
+            MmioHalfWordRegion region = new MmioHalfWordRegion(address, readFunc, writeFunc);
+
+            Map[address] = region;
+            Map[address + 1] = region;
+
+            MmioRegions.Add(region);
+        }
+
         public byte Read(uint address)
         {
             if (Map.TryGetValue(address, out IMemoryRegion region))
