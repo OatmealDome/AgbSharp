@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AgbSharp.Core.Memory.Mmio;
+using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Memory
 {
@@ -21,10 +22,14 @@ namespace AgbSharp.Core.Memory
     class AgbMemoryMap
     {
         private readonly Dictionary<uint, IMemoryRegion> Map;
+        private readonly List<IMmioRegion> MmioRegions;
+        private readonly UniqueQueue<IMmioRegion> DirtyRegions;
 
         public AgbMemoryMap()
         {
             Map = new Dictionary<uint, IMemoryRegion>();
+            MmioRegions = new List<IMmioRegion>();
+            DirtyRegions = new UniqueQueue<IMmioRegion>();
         }
 
         public void RegisterRegion(IMemoryRegion region)
@@ -40,7 +45,11 @@ namespace AgbSharp.Core.Memory
 
         public void RegisterMmio(uint address, Func<byte> readFunc, Action<byte> writeFunc)
         {
-            Map[address] = new MmioRegion(readFunc, writeFunc);
+            MmioByteRegion region = new MmioByteRegion(address, readFunc, writeFunc);
+
+            Map[address] = region;
+
+            MmioRegions.Add(region);
         }
 
         public byte Read(uint address)
@@ -59,6 +68,12 @@ namespace AgbSharp.Core.Memory
         {
             if (Map.TryGetValue(address, out IMemoryRegion region))
             {
+                IMmioRegion mmioRegion = region as IMmioRegion;
+                if (mmioRegion != null)
+                {
+                    DirtyRegions.Enqueue(mmioRegion);
+                }
+
                 region.Write(address, val);
             }
             else
@@ -89,6 +104,22 @@ namespace AgbSharp.Core.Memory
         {
             Write(address + 1, (byte)((val >> 8) & 0xFF));
             Write(address, (byte)(val & 0xFF));
+        }
+
+        public void UpdateMmio()
+        {
+            foreach (IMmioRegion region in MmioRegions)
+            {
+                region.Update();
+            }
+        }
+
+        public void FlushMmio()
+        {
+            while (DirtyRegions.TryDequeue(out IMmioRegion region))
+            {
+                region.Flush();
+            }
         }
         
     }

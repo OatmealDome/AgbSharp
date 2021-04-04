@@ -97,6 +97,8 @@ namespace AgbSharp.Core.Tests.Memory
             
             map.RegisterMmio(0xDEADBEEF, () => 0xAA, (b) => { });
 
+            map.UpdateMmio();
+
             Assert.Equal(0xAA, map.Read(0xDEADBEEF));
         }
 
@@ -112,6 +114,8 @@ namespace AgbSharp.Core.Tests.Memory
             });
 
             map.Write(0xDEADBEEF, 0xBB);
+
+            map.FlushMmio();
 
             Assert.Equal(0xBB, val);
         }
