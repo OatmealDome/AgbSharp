@@ -1,47 +1,17 @@
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Ram;
-using Xunit;
 
 namespace AgbSharp.Core.Tests.Memory.Ram
 {
-    public class InternalWramRegion_Tests
+    public class InternalWramRegion_Tests : RamRegion_Tests
     {
-        [Fact]
-        public void Read_RegisteredRegion_ReadRangeSuccess()
+        protected override uint RegionStart => InternalWramRegion.REGION_START;
+
+        protected override uint RegionSize => InternalWramRegion.REGION_SIZE;
+
+        protected override IMemoryRegion CreateRegion()
         {
-            AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new InternalWramRegion();
-
-            // Write direct to the region instead of through AgbMemoryMap
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
-            {
-                region.Write(i, (byte)(i & 0xFF));
-            }
-
-            map.RegisterRegion(region);
-
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_START + InternalWramRegion.REGION_SIZE; i++)
-            {
-                Assert.Equal(i & 0xFF, map.Read(i));
-            }
-        }
-
-        [Fact]
-        public void Write_RegisteredRegion_WriteRangeSuccess()
-        {
-            AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new InternalWramRegion();
-
-            map.RegisterRegion(region);
-
-            for (uint i = InternalWramRegion.REGION_START; i < InternalWramRegion.REGION_SIZE; i++)
-            {
-                byte value = (byte)(i & 0xFF);
-
-                map.Write(i, value);
-
-                Assert.Equal(value, map.Read(i));
-            }
+            return new InternalWramRegion();
         }
 
     }
