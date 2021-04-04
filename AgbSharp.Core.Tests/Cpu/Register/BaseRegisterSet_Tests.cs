@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Register;
 using Xunit;
 
-namespace AgbSharp.Core.Tests.Cpu
+namespace AgbSharp.Core.Tests.Cpu.Register
 {
     public class BaseRegisterSet_Tests
     {

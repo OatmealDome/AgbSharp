@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using AgbSharp.Core.Cpu.Register;
 using Xunit;
 
-namespace AgbSharp.Core.Tests.Cpu
+namespace AgbSharp.Core.Tests.Cpu.Register
 {
-    public class OverrideRegisterSet_Tests
+    public class FastIrqRegisterSet_Tests
     {
         [Theory]
         [MemberData(nameof(SameRegisters))]
         public void GetSet_Register_Equal(int regNum)
         {
             IRegisterSet baseSet = new BaseRegisterSet();
-            IRegisterSet overrideSet = new OverrideRegisterSet(baseSet);
+            IRegisterSet overrideSet = new FastIrqRegisterSet(baseSet);
 
             baseSet.GetRegister(regNum) = 0xFFFFFFFF;
 
@@ -64,16 +64,16 @@ namespace AgbSharp.Core.Tests.Cpu
             new object[] { 5 },
             new object[] { 6 },
             new object[] { 7 },
-            new object[] { 8 },
-            new object[] { 9 },
-            new object[] { 10 },
-            new object[] { 11 },
-            new object[] { 12 },
             new object[] { 15 }
         };
 
         public static IEnumerable<object[]> OverriddenRegisters => new List<object[]>
         {
+            new object[] { 8 },
+            new object[] { 9 },
+            new object[] { 10 },
+            new object[] { 11 },
+            new object[] { 12 },
             new object[] { 13 },
             new object[] { 14 }
         };
