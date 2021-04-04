@@ -17,8 +17,8 @@ namespace AgbSharp.Core.Tests.Cpu
 
             cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC) = InternalWramRegion.REGION_START;
 
-            cpu.MemoryMap.Write(0x4000208, 1); // IME = 1
-            cpu.MemoryMap.Write(0x4000200, 1); // IE = VBlank IRQ enabled
+            cpu.MemoryMap.WriteU32(0x4000208, 1); // IME = 1
+            cpu.MemoryMap.WriteU16(0x4000200, 1); // IE = VBlank IRQ enabled
 
             cpu.MemoryMap.FlushMmio();
 
@@ -32,7 +32,7 @@ namespace AgbSharp.Core.Tests.Cpu
             Assert.Equal((uint)0b11111000000000000000000000110000, cpu.CurrentSavedStatus.RegisterValue);
             Assert.Equal(InternalWramRegion.REGION_START, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
             Assert.Equal((uint)0x00000018, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC));
-            Assert.Equal(1, cpu.MemoryMap.Read(0x4000202)); // IF = VBlank
+            Assert.Equal(1, cpu.MemoryMap.ReadU16(0x4000202)); // IF = VBlank
         }
 
         [Fact]
@@ -40,8 +40,8 @@ namespace AgbSharp.Core.Tests.Cpu
         {
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.MemoryMap.Write(0x4000208, 0); // IME = 0
-            cpu.MemoryMap.Write(0x4000200, 1); // IE = VBlank IRQ enabled
+            cpu.MemoryMap.WriteU32(0x4000208, 0); // IME = 0
+            cpu.MemoryMap.WriteU16(0x4000200, 1); // IE = VBlank IRQ enabled
 
             cpu.MemoryMap.FlushMmio();
 
@@ -55,8 +55,8 @@ namespace AgbSharp.Core.Tests.Cpu
         {
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.MemoryMap.Write(0x4000208, 1); // IME = 1
-            cpu.MemoryMap.Write(0x4000200, 0); // IE = VBlank IRQ disabled
+            cpu.MemoryMap.WriteU32(0x4000208, 1); // IME = 1
+            cpu.MemoryMap.WriteU16(0x4000200, 0); // IE = VBlank IRQ disabled
 
             cpu.MemoryMap.FlushMmio();
 
@@ -72,8 +72,8 @@ namespace AgbSharp.Core.Tests.Cpu
 
             cpu.CurrentStatus.IrqDisable = true;
 
-            cpu.MemoryMap.Write(0x4000208, 1); // IME = 1
-            cpu.MemoryMap.Write(0x4000200, 1); // IE = VBlank IRQ enabled
+            cpu.MemoryMap.WriteU32(0x4000208, 1); // IME = 1
+            cpu.MemoryMap.WriteU16(0x4000200, 1); // IE = VBlank IRQ enabled
 
             cpu.MemoryMap.FlushMmio();
 

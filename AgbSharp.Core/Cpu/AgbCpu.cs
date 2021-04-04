@@ -92,32 +92,32 @@ namespace AgbSharp.Core.Cpu
 
             // Interrupts MMIO
 
-            memoryMap.RegisterMmio(0x4000208, () =>
+            memoryMap.RegisterMmio32(0x4000208, () => // IME
             {
-                return (byte)EnabledInterrupts;
-            }, (x) =>
-            {
-                EnabledInterrupts = x;
-            });
-
-            memoryMap.RegisterMmio16(0x4000200, () =>
-            {
-                uint b = 0;
-
                 if (InterruptMasterEnable)
                 {
-                    BitUtil.SetBit(ref b, 0);
+                    return 1;
                 }
-
-                return (ushort)b;
+                else
+                {
+                    return 0;
+                }
             }, (x) =>
             {
                 InterruptMasterEnable = BitUtil.IsBitSet(x, 0);
             });
 
-            memoryMap.RegisterMmio(0x4000202, () =>
+            memoryMap.RegisterMmio16(0x4000200, () => // IE
             {
-                return (byte)AcknowledgedInterrupts;
+                return (ushort)EnabledInterrupts;
+            }, (x) =>
+            {
+                EnabledInterrupts = x;
+            });
+
+            memoryMap.RegisterMmio16(0x4000202, () => // IF
+            {
+                return (ushort)AcknowledgedInterrupts;
             }, (x) =>
             {
                 AcknowledgedInterrupts = x;
