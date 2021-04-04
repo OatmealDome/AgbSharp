@@ -1,6 +1,6 @@
 namespace AgbSharp.Core.Ppu
 {
-    enum PpuState
+    public enum PpuState
     {
         Render,
         HBlank,

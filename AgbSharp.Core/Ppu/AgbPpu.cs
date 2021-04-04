@@ -5,7 +5,7 @@ using AgbSharp.Core.Util;
 
 namespace AgbSharp.Core.Ppu
 {
-    class AgbPpu
+    public class AgbPpu
     {
         private readonly AgbMemoryMap MemoryMap;
         private readonly AgbCpu Cpu;
