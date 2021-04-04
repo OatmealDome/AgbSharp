@@ -1,7 +1,12 @@
+using AgbSharp.Core.Memory;
+using AgbSharp.Core.Util;
+
 namespace AgbSharp.Core.Ppu
 {
     class AgbPpu
     {
+        private readonly AgbMemoryMap MemoryMap;
+
         //
         // AGB PPU timing (from GBATEK):
         //
@@ -29,9 +34,139 @@ namespace AgbSharp.Core.Ppu
         private int HorizontalDot;
         private int VerticalLine;
 
-        public AgbPpu()
+        // DISPCNT
+        private int BackgroundMode;
+        private bool CgbMode; // always false for AGB
+        private bool UseAltFrame; // BG Modes 4 and 5 have two framebuffers
+        private bool AllowOamDuringHBlank;
+        private bool UseOneDimensionalObjs;
+        private bool ForcedBlank;
+        private bool DisplayBgZero;
+        private bool DisplayBgOne;
+        private bool DisplayBgTwo;
+        private bool DisplayBgThree;
+        private bool DisplayObjs;
+        private bool DisplayWindowZero;
+        private bool DisplayWindowOne;
+        private bool DisplayWindowObjs;
+
+        public AgbPpu(AgbMemoryMap memoryMap)
         {
-            State = PpuState.Render;   
+            MemoryMap = memoryMap;
+
+            State = PpuState.Render;
+
+            HorizontalDot = 0;
+            VerticalLine = 0;
+
+            #region DISPCNT
+
+            BackgroundMode = 0;
+            CgbMode = false;
+            UseAltFrame = false;
+            AllowOamDuringHBlank = false;
+            UseOneDimensionalObjs = false;
+            ForcedBlank = false;
+            DisplayBgZero = false;
+            DisplayBgOne = false;
+            DisplayBgTwo = false;
+            DisplayBgThree = false;
+            DisplayObjs = false;
+            DisplayWindowZero = false;
+            DisplayWindowOne = false;
+            DisplayWindowObjs = false;
+
+            MemoryMap.RegisterMmio16(0x4000000, () =>
+            {
+                ushort x = 0;
+
+                if (CgbMode)
+                {
+                    BitUtil.SetBit(ref x, 3);
+                }
+
+                if (UseAltFrame)
+                {
+                    BitUtil.SetBit(ref x, 4);
+                }
+
+                if (AllowOamDuringHBlank)
+                {
+                    BitUtil.SetBit(ref x, 5);
+                }
+
+                if (UseOneDimensionalObjs)
+                {
+                    BitUtil.SetBit(ref x, 6);
+                }
+
+                if (ForcedBlank)
+                {
+                    BitUtil.SetBit(ref x, 7);
+                }
+
+                if (DisplayBgZero)
+                {
+                    BitUtil.SetBit(ref x, 8);
+                }
+
+                if (DisplayBgOne)
+                {
+                    BitUtil.SetBit(ref x, 9);
+                }
+
+                if (DisplayBgTwo)
+                {
+                    BitUtil.SetBit(ref x, 10);
+                }
+
+                if (DisplayBgThree)
+                {
+                    BitUtil.SetBit(ref x, 11);
+                }
+
+                if (DisplayObjs)
+                {
+                    BitUtil.SetBit(ref x, 12);
+                }
+
+                if (DisplayWindowZero)
+                {
+                    BitUtil.SetBit(ref x, 13);
+                }
+
+                if (DisplayWindowOne)
+                {
+                    BitUtil.SetBit(ref x, 14);
+                }
+
+                if (DisplayWindowObjs)
+                {
+                    BitUtil.SetBit(ref x, 15);
+                }
+
+                x |= (ushort)BackgroundMode;
+
+                return x;
+            }, (x) =>
+            {
+                BackgroundMode = BitUtil.GetBitRange(x, 0, 2);
+                CgbMode = BitUtil.IsBitSet(x, 3);
+                UseAltFrame = BitUtil.IsBitSet(x, 4);
+                AllowOamDuringHBlank = BitUtil.IsBitSet(x, 5);
+                UseOneDimensionalObjs = BitUtil.IsBitSet(x, 6);
+                ForcedBlank = BitUtil.IsBitSet(x, 7);
+                DisplayBgZero = BitUtil.IsBitSet(x, 8);
+                DisplayBgOne = BitUtil.IsBitSet(x, 9);
+                DisplayBgTwo = BitUtil.IsBitSet(x, 10);
+                DisplayBgThree = BitUtil.IsBitSet(x, 11);
+                DisplayObjs = BitUtil.IsBitSet(x, 12);
+                DisplayWindowZero = BitUtil.IsBitSet(x, 13);
+                DisplayWindowOne = BitUtil.IsBitSet(x, 14);
+                DisplayWindowObjs = BitUtil.IsBitSet(x, 15);
+            });
+
+            #endregion
         }
 
         public void Tick()
