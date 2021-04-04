@@ -50,6 +50,12 @@ namespace AgbSharp.Core.Ppu
         private bool DisplayWindowOne;
         private bool DisplayWindowObjs;
 
+        // DISPSTAT
+        private bool VBlankIrqEnable;
+        private bool HBlankIrqEnable;
+        private bool VCountIrqEnable;
+        private int VCountSetting;
+
         public AgbPpu(AgbMemoryMap memoryMap)
         {
             MemoryMap = memoryMap;
@@ -164,6 +170,63 @@ namespace AgbSharp.Core.Ppu
                 DisplayWindowZero = BitUtil.IsBitSet(x, 13);
                 DisplayWindowOne = BitUtil.IsBitSet(x, 14);
                 DisplayWindowObjs = BitUtil.IsBitSet(x, 15);
+            });
+
+            #endregion
+        
+            #region DISPSTAT
+
+            VBlankIrqEnable = false;
+            HBlankIrqEnable = false;
+            VCountIrqEnable = false;
+            VCountSetting = 0;
+
+            MemoryMap.RegisterMmio16(0x4000004, () =>
+            {
+                ushort x = 0;
+
+                if (State == PpuState.VBlank && VerticalLine != 227)
+                {
+                    BitUtil.SetBit(ref x, 0);
+                }
+
+                if (HorizontalDot >= 240) // H-Blank flag set even in V-Blank
+                {
+                    BitUtil.SetBit(ref x, 1);
+                }
+
+                if (VCountSetting == VerticalLine)
+                {
+                    BitUtil.SetBit(ref x, 2);
+                }
+
+                if (VBlankIrqEnable)
+                {
+                    BitUtil.SetBit(ref x, 3);
+                }
+
+                if (HBlankIrqEnable)
+                {
+                    BitUtil.SetBit(ref x, 4);
+                }
+
+                if (VCountIrqEnable)
+                {
+                    BitUtil.SetBit(ref x, 5);
+                }
+
+                // Bits 6 and 7 unused on AGB
+
+                x |= (ushort)(VCountSetting << 8);
+
+                return x;
+            }, (x) =>
+            {
+                // Bits 0 to 2 are read-only, and bits 6 and 7 are unused on AGB
+                VBlankIrqEnable = BitUtil.IsBitSet(x, 3);
+                HBlankIrqEnable = BitUtil.IsBitSet(x, 4);
+                VCountIrqEnable = BitUtil.IsBitSet(x, 5);
+                VCountSetting = BitUtil.GetBitRange(x, 8, 15);
             });
 
             #endregion
