@@ -255,7 +255,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             bool setConditionCodes = BitUtil.IsBitSet(instruction, 20);
 
-            ref uint firstOperand = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+            int firstOperandRegNum = BitUtil.GetBitRange(instruction, 16, 19);
+            uint firstOperand = Reg(firstOperandRegNum);
+
+            if (firstOperandRegNum == PC)
+            {
+                firstOperand += 4;
+            }
 
             int destinationRegNum = BitUtil.GetBitRange(instruction, 12, 15);
             ref uint destinationReg = ref Reg(destinationRegNum);
