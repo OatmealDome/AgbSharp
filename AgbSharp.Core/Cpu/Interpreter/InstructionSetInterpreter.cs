@@ -116,7 +116,9 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 case ShiftType.ArithmaticRight: // ASR
                     if (isZeroSpecialCase || shift >= 32)
                     {
-                        if (BitUtil.IsBitSet(operand, 31))
+                        bool msb = BitUtil.IsBitSet(operand, 31);
+
+                        if (msb)
                         {
                             operand = 0xFFFFFFFF;
                         }
@@ -124,16 +126,21 @@ namespace AgbSharp.Core.Cpu.Interpreter
                         {
                             operand = 0x00000000;
                         }
+
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = msb;
+                        }
                     }
                     else
                     {
+                        if (setConditionCodes)
+                        {
+                            CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
+                        }
+
                         // C# will do an ASR if the left operand is an int
                         operand = (uint)((int)operand >> shift);
-                    }
-
-                    if (setConditionCodes)
-                    {
-                        CurrentStatus.Carry = BitUtil.IsBitSet(operand, 31);
                     }
 
                     break;
