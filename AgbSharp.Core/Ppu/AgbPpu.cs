@@ -38,6 +38,9 @@ namespace AgbSharp.Core.Ppu
         private int HorizontalDot;
         private int VerticalLine;
 
+        // Framebuffer in RGBA8 format
+        public byte[] Framebuffer;
+
         // VRAM
         private PaletteRamRegion PaletteRam;
         private VideoRamRegion VideoRam;
@@ -74,6 +77,8 @@ namespace AgbSharp.Core.Ppu
 
             HorizontalDot = 0;
             VerticalLine = 0;
+
+            Framebuffer = new byte[4 * 240 * 160];
 
             PaletteRam = new PaletteRamRegion();
             memoryMap.RegisterRegion(PaletteRam);
