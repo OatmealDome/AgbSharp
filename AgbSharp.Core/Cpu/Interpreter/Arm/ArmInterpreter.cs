@@ -184,6 +184,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
 
                 shift = (int)(Reg(BitUtil.GetBitRange(instruction, 8, 11)) & 0xFF);
+
+                if (shift == 0)
+                {
+                    return operand;
+                }
             }
             else // immediate
             {
