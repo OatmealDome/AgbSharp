@@ -244,7 +244,17 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 secondOperand = (uint)BitUtil.GetBitRange(instruction, 0, 7);
 
                 // ROR
-                secondOperand = BitUtil.RotateRight(secondOperand, BitUtil.GetBitRange(instruction, 8, 11) * 2);
+                int shift = BitUtil.GetBitRange(instruction, 8, 11) * 2;
+
+                if (shift != 0)
+                {
+                    if (setConditionCodes)
+                    {
+                        CurrentStatus.Carry = BitUtil.IsBitSet(secondOperand, shift - 1);
+                    }
+
+                    secondOperand = BitUtil.RotateRight(secondOperand, shift);
+                }
             }
             else // second operand is register
             {
