@@ -20,13 +20,20 @@ namespace AgbSharp.Core.Memory
 
         private byte[] Data;
 
-        public RangedMemoryRegion(uint start, uint size, uint mirrorEnd)
+        public RangedMemoryRegion(uint start, uint size, uint mirrorEnd, byte[] data = null)
         {
             RegionStart = start;
             RegionSize = size;
             MirrorEnd = mirrorEnd;
 
-            Data = new byte[RegionSize];
+            if (data == null)
+            {
+                Data = new byte[RegionSize];
+            }
+            else
+            {
+                Data = data;
+            }
         }
 
         public IEnumerable<byte> GetHandledRanges()
