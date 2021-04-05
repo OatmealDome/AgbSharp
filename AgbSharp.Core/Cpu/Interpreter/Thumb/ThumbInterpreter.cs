@@ -381,15 +381,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     if (sRegNum == PC)
                     {
                         newPc = (uint)((Reg(PC) + 2) & ~2);
+
+                        CurrentStatus.Thumb = false;
                     }
                     else
                     {
                         newPc = sReg;
-                    }
 
-                    if (!BitUtil.IsBitSet((uint)sRegNum, 0) || sRegNum == PC)
-                    {
-                        CurrentStatus.Thumb = false;
+                        if (BitUtil.IsBitSet(newPc, 0))
+                        {
+                            CurrentStatus.Thumb = false;
+
+                            newPc--;
+                        }
                     }
 
                     Reg(PC) = newPc;
