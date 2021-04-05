@@ -107,7 +107,7 @@ namespace AgbSharp.Core.Tests.Util
             string str;
             bool result = queue.TryDequeue(out str);
 
-            Assert.Equal(null, str);
+            Assert.Null(str);
             Assert.False(result);
         }
 
