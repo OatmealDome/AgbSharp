@@ -337,7 +337,7 @@ namespace AgbSharp.Core.Ppu
                         IncrementVerticalLine();
                     }
 
-                    if (VerticalLine == 228)
+                    if (VerticalLine == 0)
                     {
                         State = PpuState.Render;
                     }
