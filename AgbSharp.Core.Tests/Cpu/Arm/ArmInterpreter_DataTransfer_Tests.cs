@@ -294,5 +294,37 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0x77777777, cpu.CurrentRegisterSet.GetRegister(7));
         }
 
+        [Fact]
+        public void PushPop_PushAndPopThreeRegisters_RegistersCorrect()
+        {
+            const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
+
+            AgbCpu cpu = CpuUtil.CreateCpu();
+
+            FillRegistersWithDummyData(cpu);
+
+            cpu.CurrentRegisterSet.GetRegister(CpuUtil.SP) = targetAddress;
+
+            CpuUtil.RunCpu(cpu, new uint[]
+            {
+                0xA2402DE9 // PUSH {r1, r5, r7, LR}
+            }, true);
+
+            cpu.CurrentRegisterSet.GetRegister(1) = 0xDEADBEEF;
+            cpu.CurrentRegisterSet.GetRegister(5) = 0xCAFEBABE;
+            cpu.CurrentRegisterSet.GetRegister(7) = 0xFEEDFACE;
+            cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR) = 0xF00DC0DE;
+
+            CpuUtil.RunCpu(cpu, new uint[]
+            {
+                0xA240BDE8 // POP {r1, r5, r7, LR}
+            }, true);
+
+            Assert.Equal((uint)0x11111111, cpu.CurrentRegisterSet.GetRegister(1));
+            Assert.Equal((uint)0x55555555, cpu.CurrentRegisterSet.GetRegister(5));
+            Assert.Equal((uint)0x77777777, cpu.CurrentRegisterSet.GetRegister(7));
+            Assert.Equal((uint)0xEEEEEEEE, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
+        }
+
     }
 }
