@@ -274,7 +274,7 @@ namespace AgbSharp.Core.Ppu
         {
             if (State == PpuState.Render)
             {
-                // TODO: Rendering
+                Render();
             }
 
             HorizontalDot++;
@@ -344,6 +344,43 @@ namespace AgbSharp.Core.Ppu
 
                     break;
             }
+        }
+
+        // Colour intensities are 0 to 31
+        private void DrawDot(int r, int g, int b)
+        {
+            int outputOfs = ((VerticalLine * 240) + HorizontalDot) * 4;
+
+            byte GbaColourToOutputColour(int colour)
+            {
+                return (byte)((colour / 31.0f) * 255.0f);
+            }
+
+            Framebuffer[outputOfs] = GbaColourToOutputColour(r);
+            Framebuffer[outputOfs + 1] = GbaColourToOutputColour(g);
+            Framebuffer[outputOfs + 2] = GbaColourToOutputColour(b);
+            Framebuffer[outputOfs + 3] = 0xFF; // opaque
+        }
+
+        private void Render()
+        {
+            if (ForcedBlank)
+            {
+                // During forced blank, the PPU always renders white
+                DrawDot(31, 31, 31);
+
+                return;
+            }
+
+            switch (BackgroundMode)
+            {
+                default:
+                    // Unimplemented modes will appear as an all-blue screen
+                    DrawDot(0, 0, 31);
+                    
+                    return;
+            }
+
         }
 
     }
