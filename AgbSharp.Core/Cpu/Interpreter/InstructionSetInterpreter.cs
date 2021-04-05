@@ -147,9 +147,16 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 case ShiftType.RotateRight: // ROR
                     if (isZeroSpecialCase)
                     {
-                        operand = BitUtil.RotateRight(operand, 1);
+                        // This operation is like RRX#1. See here for a diagram:
+                        // http://www-mdp.eng.cam.ac.uk/web/library/enginfo/mdp_micro/lecture4/lecture4-3-4.html
 
-                        if (CurrentStatus.Carry)
+                        bool oldCarry = CurrentStatus.Carry;
+
+                        CurrentStatus.Carry = BitUtil.IsBitSet(operand, 0);
+
+                        operand >>= 1;
+
+                        if (oldCarry)
                         {
                             BitUtil.SetBit(ref operand, 31);
                         }
