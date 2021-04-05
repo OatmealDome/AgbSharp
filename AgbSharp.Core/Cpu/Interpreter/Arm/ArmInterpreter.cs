@@ -520,29 +520,29 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             {
                 uint secondOperand = GetSecondOperandForAluOperation(instruction, false);
 
-                uint toWrite = 0;
+                uint psr = programStatus.RegisterValue;
 
                 if (BitUtil.IsBitSet(instruction, 19))
                 {
-                    toWrite |= secondOperand & 0xFF000000;
+                    psr = (psr & 0x00FFFFFF) | secondOperand & 0xFF000000;
                 }
                 
                 if (BitUtil.IsBitSet(instruction, 18))
                 {
-                    toWrite |= secondOperand & 0x00FF0000;
+                    psr = (psr & 0xFF00FFFF) | secondOperand & 0x00FF0000;
                 }
 
                 if (BitUtil.IsBitSet(instruction, 17))
                 {
-                    toWrite |= secondOperand & 0x0000FF00;
+                    psr = (psr & 0xFFFF00FF) | secondOperand & 0x0000FF00;
                 }
 
                 if (BitUtil.IsBitSet(instruction, 16))
                 {
-                    toWrite |= secondOperand & 0x000000FF;
+                    psr = (psr & 0xFFFFFF00) | secondOperand & 0x000000FF;
                 }
 
-                programStatus.RegisterValue = toWrite;
+                programStatus.RegisterValue = psr;
             }
             else // MRS
             {
