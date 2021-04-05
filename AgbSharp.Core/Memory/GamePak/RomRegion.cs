@@ -1,41 +1,36 @@
-using System;
 using System.Collections.Generic;
 
 namespace AgbSharp.Core.Memory.GamePak
 {
-    class RomRegion : IMemoryRegion
+    class RomRegion : RangedMemoryRegion
     {
         public const uint REGION_ONE_START = 0x08000000;
         public const uint REGION_TWO_START = 0x0A000000;
         public const uint REGION_THREE_START = 0x0C000000;
         public const uint REGION_SIZE = 0x2000000;
-        public const uint MASK = 0x1FFFFFF;
 
-        private byte[] Data;
-
-        public RomRegion(byte[] data)
+        public RomRegion(byte[] data) : base(REGION_ONE_START, REGION_SIZE, REGION_THREE_START + REGION_SIZE - 1, data)
         {
-            Data = data;
+
         }
 
-        public IEnumerable<Tuple<uint, uint>> GetHandledRanges()
+        public override IEnumerable<byte> GetHandledRanges()
         {
-            return new List<Tuple<uint, uint>>()
+            // We can stretch across multiple "ranges".
+            return new List<byte>()
             {
-                new Tuple<uint, uint>(REGION_ONE_START, REGION_SIZE),
-                new Tuple<uint, uint>(REGION_TWO_START, REGION_SIZE),
-                new Tuple<uint, uint>(REGION_THREE_START, REGION_SIZE)
+                0x08,
+                0x09,
+                0x0A,
+                0x0B,
+                0x0C,
+                0x0D
             };
         }
 
-        public byte Read(uint address)
+        public override void Write(uint address, byte val)
         {
-            return Data[address & MASK];
-        }
-
-        public void Write(uint address, byte val)
-        {
-            Data[address & MASK] = val;
+            // Can't write to ROM
         }
 
     }
