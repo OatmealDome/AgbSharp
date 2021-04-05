@@ -5,11 +5,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 {
     class ThumbInterpreter : InstructionSetInterpreter
     {
-        private uint HiBitsForLongBranch;
-
         public ThumbInterpreter(AgbCpu cpu) : base(cpu)
         {
-            HiBitsForLongBranch = 0;
+
         }
 
         public override int Step()
