@@ -277,7 +277,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (firstOperandRegNum == PC)
             {
-                firstOperand += 4;
+                if (!BitUtil.IsBitSet(instruction, 25) && BitUtil.IsBitSet(instruction, 4))
+                {
+                    firstOperand += 8;
+                }
+                else
+                {
+                    firstOperand += 4;
+                }
             }
 
             int destinationRegNum = BitUtil.GetBitRange(instruction, 12, 15);
