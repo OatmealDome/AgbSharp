@@ -41,6 +41,7 @@ namespace AgbSharp.Core.Ppu
         // VRAM
         private PaletteRamRegion PaletteRam;
         private VideoRamRegion VideoRam;
+        private OamRegion Oam;
 
         // DISPCNT
         private int BackgroundMode;
@@ -79,7 +80,10 @@ namespace AgbSharp.Core.Ppu
 
             VideoRam = new VideoRamRegion();
             memoryMap.RegisterRegion(VideoRam);
-
+            
+            Oam = new OamRegion();
+            memoryMap.RegisterRegion(Oam);
+            
             #region DISPCNT
 
             BackgroundMode = 0;
