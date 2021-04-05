@@ -160,12 +160,12 @@ namespace AgbSharp.Core.Cpu.Interpreter
                     }
                     else
                     {
-                        operand = BitUtil.RotateRight(operand, shift);
-
                         if (setConditionCodes)
                         {
                             CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
                         }
+
+                        operand = BitUtil.RotateRight(operand, shift);
                     }
 
                     break;
