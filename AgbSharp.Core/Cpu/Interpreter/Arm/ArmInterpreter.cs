@@ -556,10 +556,15 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
         private int LoadStoreOperation(uint instruction)
         {
-            ref uint nReg = ref Reg(BitUtil.GetBitRange(instruction, 16, 19));
+            int nRegNum = BitUtil.GetBitRange(instruction, 16, 19);
+            uint nReg = Reg(nRegNum);
+
+            if (nRegNum == PC)
+            {
+                nReg += 4;
+            }
 
             int dRegNum = BitUtil.GetBitRange(instruction, 12, 15);
-            ref uint dReg = ref Reg(dRegNum);
 
             bool isImmediateOffset = !BitUtil.IsBitSet(instruction, 25);
             bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
@@ -603,11 +608,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             if (isWriteBack || !isPreIndex)
             {
-                nReg = address;
+                Reg(nRegNum) = address;
             }
 
             if (isLoad)
             {
+                ref uint dReg = ref Reg(dRegNum);
+
                 if (isByte)
                 {
                     dReg = Cpu.MemoryMap.Read(effectiveAddress);
@@ -638,6 +645,16 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
             else
             {
+                uint dReg;
+                if (dRegNum == PC)
+                {
+                    dReg = Reg(PC) + 12;
+                }
+                else
+                {
+                    dReg = Reg(dRegNum);
+                }
+
                 if (isByte)
                 {
                     Cpu.MemoryMap.Write(effectiveAddress, (byte)dReg);
