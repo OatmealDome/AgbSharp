@@ -72,7 +72,16 @@ namespace AgbSharp.Core.Cpu.Interpreter
                             CurrentStatus.Carry = BitUtil.IsBitSet(operand, 32 - shift);
                         }
 
-                        operand <<= shift;
+                        // C# takes the shift amount as (right-hand operand & 0x1F), so any value 32 or higher will be treated as 0.
+                        // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators
+                        if (shift >= 32)
+                        {
+                            operand = 0;
+                        }
+                        else
+                        {
+                            operand <<= shift;
+                        }
                     }
 
                     break;
@@ -93,12 +102,19 @@ namespace AgbSharp.Core.Cpu.Interpreter
                             CurrentStatus.Carry = BitUtil.IsBitSet(operand, shift - 1);
                         }
 
-                        operand >>= shift;
+                        if (shift >= 32)
+                        {
+                            operand = 0;
+                        }
+                        else
+                        {
+                            operand >>= shift;
+                        }
                     }
 
                     break;
                 case ShiftType.ArithmaticRight: // ASR
-                    if (isZeroSpecialCase)
+                    if (isZeroSpecialCase || shift >= 32)
                     {
                         if (BitUtil.IsBitSet(operand, 31))
                         {
