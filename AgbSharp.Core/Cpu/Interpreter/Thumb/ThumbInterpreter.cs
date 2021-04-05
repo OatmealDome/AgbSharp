@@ -388,10 +388,12 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     {
                         newPc = sReg;
 
-                        if (BitUtil.IsBitSet(newPc, 0))
+                        if (!BitUtil.IsBitSet(newPc, 0))
                         {
                             CurrentStatus.Thumb = false;
-
+                        }
+                        else
+                        {
                             newPc--;
                         }
                     }
