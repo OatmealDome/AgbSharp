@@ -56,9 +56,9 @@ namespace AgbSharp.Core
 
         public void RunFrame()
         {
-            while (ElapsedFrameCycles < CyclesPerDot)
+            while (ElapsedFrameCycles < CyclesPerFrame)
             {
-                while (CpuCyclesForDot < 4)
+                while (CpuCyclesForDot < CyclesPerDot)
                 {
                     CpuCyclesForDot += Cpu.Step();
                 }
