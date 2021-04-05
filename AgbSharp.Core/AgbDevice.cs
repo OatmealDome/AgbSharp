@@ -27,6 +27,9 @@ namespace AgbSharp.Core
             private set;
         }
 
+        // POSTFLG
+        private byte PostBootFlag;  // 1 = Not first boot
+
         private int ElapsedFrameCycles;
         private int CpuCyclesForDot;
         private const int CyclesPerFrame = 228 * 308 * 4; // 228 lines * 308 dots/line * 4 cycles/dot
@@ -37,6 +40,10 @@ namespace AgbSharp.Core
             MemoryMap = new AgbMemoryMap();
             Cpu = new AgbCpu(MemoryMap);
             Ppu = new AgbPpu(MemoryMap, Cpu);
+
+            PostBootFlag = 0;
+
+            MemoryMap.RegisterMmio(0x4000300, () => PostBootFlag, (x) => PostBootFlag = x);
         }
 
         public void LoadBios(byte[] bios)
