@@ -36,7 +36,7 @@ namespace AgbSharp.Core.Memory
             }
         }
 
-        public IEnumerable<byte> GetHandledRanges()
+        public virtual IEnumerable<byte> GetHandledRanges()
         {
             return new List<byte>()
             {
@@ -54,7 +54,7 @@ namespace AgbSharp.Core.Memory
             return Data[address & Mask];
         }
 
-        public void Write(uint address, byte val)
+        public virtual void Write(uint address, byte val)
         {
             Data[address & Mask] = val;
         }
