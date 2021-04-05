@@ -70,13 +70,13 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
         }
 
         [Fact]
-        public void BranchAndExchange_BranchToRegZeroInThumb_PcCorrect()
+        public void BranchAndExchange_BranchToRegOneInThumb_PcCorrect()
         {
             const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
 
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.CurrentRegisterSet.GetRegister(0) = targetAddress;
+            cpu.CurrentRegisterSet.GetRegister(1) = targetAddress + 1;
 
             CpuUtil.RunCpu(cpu, new uint[]
             {

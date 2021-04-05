@@ -152,15 +152,17 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 Reg(LR) = Reg(PC);
             }
 
-            if (BitUtil.IsBitSet(instruction, 0)) // switch to Thumb
+            uint targetAddress = Reg(targetRegister);
+
+            if (BitUtil.IsBitSet(targetAddress, 0)) // switch to Thumb
             {
-                Reg(PC) = Reg(targetRegister - 1);
+                Reg(PC) = targetAddress - 1;
 
                 CurrentStatus.Thumb = true;
             }
             else // continue in ARM
             {
-                Reg(PC) = Reg(targetRegister);
+                Reg(PC) = targetAddress;
             }
 
             return 2 + 1; // 2S + 1N
