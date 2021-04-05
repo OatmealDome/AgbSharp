@@ -567,7 +567,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             Assert.Equal((uint)0x00007FFF, cpu.CurrentRegisterSet.GetRegister(0));
             Assert.Equal((uint)0x0000FFFF, cpu.CurrentRegisterSet.GetRegister(1));
-            Assert.False(cpu.CurrentStatus.Carry);
+            Assert.True(cpu.CurrentStatus.Carry);
         }
 
         [Fact]
