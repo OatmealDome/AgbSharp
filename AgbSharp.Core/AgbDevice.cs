@@ -3,6 +3,7 @@ using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Bios;
 using AgbSharp.Core.Memory.GamePak;
+using AgbSharp.Core.Memory.Ram;
 using AgbSharp.Core.Ppu;
 
 namespace AgbSharp.Core
@@ -40,6 +41,9 @@ namespace AgbSharp.Core
             MemoryMap = new AgbMemoryMap();
             Cpu = new AgbCpu(MemoryMap);
             Ppu = new AgbPpu(MemoryMap, Cpu);
+
+            MemoryMap.RegisterRegion(new InternalWramRegion());
+            MemoryMap.RegisterRegion(new ExternalWramRegion());
 
             PostBootFlag = 0;
 
