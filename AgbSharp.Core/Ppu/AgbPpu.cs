@@ -279,6 +279,11 @@ namespace AgbSharp.Core.Ppu
                 HorizontalDot = 0;
                 VerticalLine++;
 
+                if (VerticalLine == 228)
+                {
+                    VerticalLine = 0;
+                }
+
                 if (VCountIrqEnable)
                 {
                     if (VCountSetting == VerticalLine)
