@@ -22,13 +22,13 @@ namespace AgbSharp.Core.Tests.Cpu
             return cpu;
         }
 
-        public static void RunCpu(AgbCpu cpu, uint[] instructions, bool littleEndian = false)
+        public static void RunCpu(AgbCpu cpu, uint[] instructions, bool bigEndian = false)
         {
             for (int i = 0; i < instructions.Length; i++)
             {
                 uint instruction = instructions[i];
 
-                if (!littleEndian)
+                if (bigEndian)
                 {
                     instruction = ByteUtil.Swap32(instruction);
                 }
