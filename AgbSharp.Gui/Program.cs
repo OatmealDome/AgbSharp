@@ -5,6 +5,8 @@ using System.Diagnostics;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
+using AgbSharp.Core;
+using System.IO;
 
 namespace GbSharp.Gui
 {
@@ -12,10 +14,10 @@ namespace GbSharp.Gui
     {
         static void Main(string[] args)
         {
-            if (args.Length == 0)
+            if (args.Length != 2)
             {
                 Console.WriteLine("dotnet AgbSharp.Gui.dll <bootrom> <rom>");
-                //return;
+                return;
             }
 
             // Create a window to render to using Veldrid
@@ -41,6 +43,11 @@ namespace GbSharp.Gui
             stopwatch.Start();
 #endif
 
+            AgbDevice agbDevice = new AgbDevice();
+
+            agbDevice.LoadBios(File.ReadAllBytes(args[0]));
+            agbDevice.LoadRom(File.ReadAllBytes(args[1]));
+
             // Run emulation
             while (window.Exists)
             {
@@ -48,8 +55,7 @@ namespace GbSharp.Gui
                 double newElapsed = stopwatch.Elapsed.TotalMilliseconds;
 #endif
 
-                // TODO
-                // Run frame
+                agbDevice.RunFrame();
 
 #if DEBUG
                 // Choppy audio, but we shouldn't need this for debugging anyway
@@ -60,22 +66,8 @@ namespace GbSharp.Gui
 #endif
                 
                 Sdl2Events.ProcessEvents();
-                
-                // TODO
-                // Draw frame using pixel output
 
-                byte[] framebuffer = new byte[4 * 240 * 160];
-                for (int i = 0; i < (240 * 160); i++)
-                {
-                    int fbPos = i * 4;
-
-                    framebuffer[fbPos] = 0xff;
-                    framebuffer[fbPos + 1] = 0;
-                    framebuffer[fbPos + 2] = 0;
-                    framebuffer[fbPos + 3] = 0xff;
-                }
-
-                renderer.Draw(framebuffer);
+                renderer.Draw(agbDevice.Ppu.Framebuffer);
 
                 // TODO
                 // Update controllers
