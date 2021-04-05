@@ -349,7 +349,12 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
         private int FormFiveRegisterOperations(uint instruction)
         {
             int sRegNum = (BitUtil.GetBit(instruction, 6) << 3) | BitUtil.GetBitRange(instruction, 3, 5);
-            ref uint sReg = ref Reg(sRegNum);
+            uint sReg = Reg(sRegNum);
+
+            if (sRegNum == PC)
+            {
+                sReg += 2;
+            }
 
             int dRegNum = (BitUtil.GetBit(instruction, 7) << 3) | BitUtil.GetBitRange(instruction, 0, 2);
             ref uint dReg = ref Reg(dRegNum);
