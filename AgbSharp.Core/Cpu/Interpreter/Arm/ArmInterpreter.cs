@@ -294,6 +294,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 r = 1;
             }
 
+            // Save the current carry in case we need it again later
+            bool lastCarry = CurrentStatus.Carry;
+
             uint secondOperand = GetSecondOperandForAluOperation(instruction, setConditionCodes);
 
             uint result;
@@ -349,19 +352,19 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                     break;
                 case 0b0101: // ADC
-                    result = firstOperand + secondOperand + (uint)(CurrentStatus.Carry ? 1 : 0);
+                    result = firstOperand + secondOperand + (uint)(lastCarry ? 1 : 0);
 
                     SetCarryAndOverflowOnAddition(firstOperand, secondOperand);
 
                     break;
                 case 0b0110: // SBC
-                    result = firstOperand - secondOperand + (uint)(CurrentStatus.Carry ? 1 : 0) - 1;
+                    result = firstOperand - secondOperand + (uint)(lastCarry ? 1 : 0) - 1;
                     
                     SetCarryAndOverflowOnSubtraction(firstOperand, secondOperand, true);
 
                     break;
                 case 0b0111: // RSC
-                    result = secondOperand - firstOperand + (uint)(CurrentStatus.Carry ? 1 : 0) - 1;
+                    result = secondOperand - firstOperand + (uint)(lastCarry ? 1 : 0) - 1;
 
                     SetCarryAndOverflowOnSubtraction(secondOperand, firstOperand, true);
 
