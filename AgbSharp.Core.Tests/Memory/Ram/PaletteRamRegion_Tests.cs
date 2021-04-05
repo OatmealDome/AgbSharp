@@ -9,7 +9,9 @@ namespace AgbSharp.Core.Tests.Memory.Ram
 
         protected override uint RegionSize => PaletteRamRegion.REGION_SIZE;
 
-        protected override IMemoryRegion CreateRegion()
+        protected override uint MirrorStart => PaletteRamRegion.MIRROR_END + 1 - PaletteRamRegion.REGION_SIZE;
+
+        protected override RangedMemoryRegion CreateRegion()
         {
             return new PaletteRamRegion();
         }

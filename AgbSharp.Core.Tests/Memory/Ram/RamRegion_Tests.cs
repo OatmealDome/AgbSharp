@@ -15,13 +15,19 @@ namespace AgbSharp.Core.Tests.Memory.Ram
             get;
         }
 
-        protected abstract IMemoryRegion CreateRegion();
+        // Specify the LAST mirror
+        protected abstract uint MirrorStart
+        {
+            get;
+        }
+
+        protected abstract RangedMemoryRegion CreateRegion();
 
         [Fact]
         public void Read_RegisteredRegion_ReadRangeSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = CreateRegion();
+            RangedMemoryRegion region = CreateRegion();
 
             // Write direct to the region instead of through AgbMemoryMap
             for (uint i = RegionStart; i < RegionStart + RegionSize; i++)
@@ -41,7 +47,7 @@ namespace AgbSharp.Core.Tests.Memory.Ram
         public void Write_RegisteredRegion_WriteRangeSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = CreateRegion();
+            RangedMemoryRegion region = CreateRegion();
 
             map.RegisterRegion(region);
 
@@ -53,6 +59,19 @@ namespace AgbSharp.Core.Tests.Memory.Ram
 
                 Assert.Equal(value, map.Read(i));
             }
+        }
+
+        [Fact]
+        public void ReadWrite_WriteToRealAndReadFromMirror_MirrorReadSuccess()
+        {
+            AgbMemoryMap map = new AgbMemoryMap();
+            RangedMemoryRegion region = CreateRegion();
+
+            map.RegisterRegion(region);
+
+            map.Write(RegionStart + RegionSize - 1, 0xAB);
+
+            Assert.Equal(0xAB, map.Read(MirrorStart + RegionSize - 1));
         }
         
     }

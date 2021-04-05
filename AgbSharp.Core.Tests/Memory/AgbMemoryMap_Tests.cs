@@ -11,43 +11,15 @@ namespace AgbSharp.Core.Tests.Memory
         private const uint FIRST_RANGE_START = 0x0;
         private const uint SECOND_RANGE_START = 0x10000;
 
-        class TestMemoryRegion : IMemoryRegion
+        class TestMemoryRegion : RangedMemoryRegion
         {
             private byte[] Bytes;
 
-            public TestMemoryRegion()
+            public TestMemoryRegion() : base(FIRST_RANGE_START, TEST_REGION_SIZE, SECOND_RANGE_START + TEST_REGION_SIZE)
             {
                 Bytes = new byte[TEST_REGION_SIZE];
             }
-
-            public IEnumerable<Tuple<uint, uint>> GetHandledRanges()
-            {
-                return new List<Tuple<uint, uint>>()
-                {
-                    new Tuple<uint, uint>(FIRST_RANGE_START, TEST_REGION_SIZE),
-                    new Tuple<uint, uint>(SECOND_RANGE_START, TEST_REGION_SIZE)
-                };
-            }
-
-            public byte Read(uint address)
-            {
-                if (address >= SECOND_RANGE_START)
-                {
-                    address -= SECOND_RANGE_START;
-                }
-
-                return Bytes[address];
-            }
-
-            public void Write(uint address, byte val)
-            {
-                if (address >= SECOND_RANGE_START)
-                {
-                    address -= SECOND_RANGE_START;
-                }
-                
-                Bytes[address] = val;
-            }
+            
         }
 
         [Theory]
@@ -55,7 +27,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void Read_RegisteredTestRegion_ReadRangeSuccess(uint rangeStart)
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             // Write direct to the region instead of through AgbMemoryMap
             for (uint i = rangeStart; i < rangeStart + TEST_REGION_SIZE; i++)
@@ -76,7 +48,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void Write_RegisteredTestRegion_WriteRangeSuccess(uint rangeStart)
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             map.RegisterRegion(region);
 
@@ -94,7 +66,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void ReadU32_WithDummyData_ReadSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             // Write directly to the region
             region.Write(FIRST_RANGE_START, 0xDD);
@@ -111,7 +83,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void WriteU32_WithDummyData_WriteSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             map.RegisterRegion(region);
 
@@ -124,7 +96,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void ReadU16_WithDummyData_ReadSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             // Write directly to the region
             region.Write(FIRST_RANGE_START, 0xBB);
@@ -139,7 +111,7 @@ namespace AgbSharp.Core.Tests.Memory
         public void WriteU16_WithDummyData_WriteSuccess()
         {
             AgbMemoryMap map = new AgbMemoryMap();
-            IMemoryRegion region = new TestMemoryRegion();
+            RangedMemoryRegion region = new TestMemoryRegion();
 
             map.RegisterRegion(region);
 

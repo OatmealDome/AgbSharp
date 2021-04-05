@@ -21,25 +21,24 @@ namespace AgbSharp.Core.Memory
 
     public class AgbMemoryMap
     {
-        private readonly Dictionary<uint, IMemoryRegion> Map;
+        private readonly Dictionary<byte, RangedMemoryRegion> RangedRegions;
+        private readonly Dictionary<uint, IMemoryRegion> AuxiliaryMap;
         private readonly List<IMmioRegion> MmioRegions;
         private readonly UniqueQueue<IMmioRegion> DirtyRegions;
 
         public AgbMemoryMap()
         {
-            Map = new Dictionary<uint, IMemoryRegion>();
+            RangedRegions = new Dictionary<byte, RangedMemoryRegion>();
+            AuxiliaryMap = new Dictionary<uint, IMemoryRegion>();
             MmioRegions = new List<IMmioRegion>();
             DirtyRegions = new UniqueQueue<IMmioRegion>();
         }
 
-        public void RegisterRegion(IMemoryRegion region)
+        public void RegisterRegion(RangedMemoryRegion region)
         {
-            foreach (Tuple<uint, uint> range in region.GetHandledRanges())
+            foreach (byte range in region.GetHandledRanges())
             {
-                for (uint i = range.Item1; i < range.Item1 + range.Item2; i++)
-                {
-                    Map[i] = region;
-                }
+                RangedRegions[range] = region;
             }
         }
 
@@ -47,7 +46,7 @@ namespace AgbSharp.Core.Memory
         {
             MmioByteRegion region = new MmioByteRegion(address, readFunc, writeFunc);
 
-            Map[address] = region;
+            AuxiliaryMap[address] = region;
 
             MmioRegions.Add(region);
         }
@@ -56,8 +55,8 @@ namespace AgbSharp.Core.Memory
         {
             MmioHalfWordRegion region = new MmioHalfWordRegion(address, readFunc, writeFunc);
 
-            Map[address] = region;
-            Map[address + 1] = region;
+            AuxiliaryMap[address] = region;
+            AuxiliaryMap[address + 1] = region;
 
             MmioRegions.Add(region);
         }
@@ -66,17 +65,21 @@ namespace AgbSharp.Core.Memory
         {
             MmioWordRegion region = new MmioWordRegion(address, readFunc, writeFunc);
 
-            Map[address] = region;
-            Map[address + 1] = region;
-            Map[address + 2] = region;
-            Map[address + 3] = region;
+            AuxiliaryMap[address] = region;
+            AuxiliaryMap[address + 1] = region;
+            AuxiliaryMap[address + 2] = region;
+            AuxiliaryMap[address + 3] = region;
 
             MmioRegions.Add(region);
         }
 
         public byte Read(uint address)
         {
-            if (Map.TryGetValue(address, out IMemoryRegion region))
+            if (RangedRegions.TryGetValue((byte)(address >> 24), out RangedMemoryRegion rangedRegion) && rangedRegion.IsValidAddress(address))
+            {
+                return rangedRegion.Read(address);
+            }
+            else if (AuxiliaryMap.TryGetValue(address, out IMemoryRegion region))
             {
                 return region.Read(address);
             }
@@ -88,7 +91,11 @@ namespace AgbSharp.Core.Memory
 
         public void Write(uint address, byte val)
         {
-            if (Map.TryGetValue(address, out IMemoryRegion region))
+            if (RangedRegions.TryGetValue((byte)(address >> 24), out RangedMemoryRegion rangedRegion) && rangedRegion.IsValidAddress(address))
+            {
+                rangedRegion.Write(address, val);
+            }
+            else if (AuxiliaryMap.TryGetValue(address, out IMemoryRegion region))
             {
                 IMmioRegion mmioRegion = region as IMmioRegion;
                 if (mmioRegion != null)

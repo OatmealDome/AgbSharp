@@ -9,7 +9,9 @@ namespace AgbSharp.Core.Tests.Memory.Ram
 
         protected override uint RegionSize => ExternalWramRegion.REGION_SIZE;
 
-        protected override IMemoryRegion CreateRegion()
+        protected override uint MirrorStart => ExternalWramRegion.MIRROR_END + 1 - ExternalWramRegion.REGION_SIZE;
+
+        protected override RangedMemoryRegion CreateRegion()
         {
             return new ExternalWramRegion();
         }

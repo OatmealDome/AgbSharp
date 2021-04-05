@@ -9,7 +9,9 @@ namespace AgbSharp.Core.Tests.Memory.Ram
 
         protected override uint RegionSize => VideoRamRegion.REGION_SIZE;
 
-        protected override IMemoryRegion CreateRegion()
+        protected override uint MirrorStart => VideoRamRegion.MIRROR_END + 1 - VideoRamRegion.REGION_SIZE;
+
+        protected override RangedMemoryRegion CreateRegion()
         {
             return new VideoRamRegion();
         }
