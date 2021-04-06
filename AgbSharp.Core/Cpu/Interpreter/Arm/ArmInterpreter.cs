@@ -672,7 +672,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 uint dReg;
                 if (dRegNum == PC)
                 {
-                    dReg = Reg(PC) + 12;
+                    dReg = Reg(PC) + 8;
                 }
                 else
                 {
