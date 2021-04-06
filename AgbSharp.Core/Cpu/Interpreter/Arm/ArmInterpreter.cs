@@ -747,16 +747,16 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 effectiveAddress = nReg;
             }
 
-            if (isWriteBack || !isPreIndex)
-            {
-                nReg = address;
-            }
-
             int opType = BitUtil.GetBitRange(instruction, 5, 6);
             InterpreterAssert(opType != 0b00, "SWP not handled here");
 
             if (isLoad)
             {
+                if (isWriteBack || !isPreIndex)
+                {
+                    nReg = address;
+                }
+
                 switch (opType)
                 {
                     case 0b01:
@@ -796,6 +796,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 InterpreterAssert(opType == 0b01, "LDRD/STRD not implemented");
 
                 Cpu.MemoryMap.WriteU16(effectiveAddress, (ushort)dReg);
+
+                if (isWriteBack || !isPreIndex)
+                {
+                    nReg = address;
+                }
 
                 return 2; // 2S
             }
