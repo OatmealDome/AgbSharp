@@ -1,3 +1,4 @@
+using System;
 using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Cpu.Interrupt;
 using AgbSharp.Core.Memory;
@@ -39,7 +40,15 @@ namespace AgbSharp.Core.Ppu
         private int VerticalLine;
 
         // Framebuffer in RGBA8 format
-        public byte[] Framebuffer;
+        public byte[] Framebuffer
+        {
+            get;
+            private set;
+        }
+
+        // Renderbuffer - all rendering takes place here, then V-Blank copies this
+        // buffer to the Framebuffer for output to the screen.
+        private byte[] Renderbuffer;
 
         // VRAM
         private PaletteRamRegion PaletteRam;
@@ -79,6 +88,7 @@ namespace AgbSharp.Core.Ppu
             VerticalLine = 0;
 
             Framebuffer = new byte[4 * 240 * 160];
+            Renderbuffer = new byte[4 * 240 * 160];
 
             PaletteRam = new PaletteRamRegion();
             memoryMap.RegisterRegion(PaletteRam);
@@ -328,6 +338,8 @@ namespace AgbSharp.Core.Ppu
                         {
                             Cpu?.RaiseInterrupt(InterruptType.VBlank);
                         }
+
+                        Array.Copy(Renderbuffer, Framebuffer, Renderbuffer.Length);
                     }
 
                     break;
@@ -356,10 +368,10 @@ namespace AgbSharp.Core.Ppu
                 return (byte)((colour / 31.0f) * 255.0f);
             }
 
-            Framebuffer[outputOfs] = GbaColourToOutputColour(r);
-            Framebuffer[outputOfs + 1] = GbaColourToOutputColour(g);
-            Framebuffer[outputOfs + 2] = GbaColourToOutputColour(b);
-            Framebuffer[outputOfs + 3] = 0xFF; // opaque
+            Renderbuffer[outputOfs] = GbaColourToOutputColour(r);
+            Renderbuffer[outputOfs + 1] = GbaColourToOutputColour(g);
+            Renderbuffer[outputOfs + 2] = GbaColourToOutputColour(b);
+            Renderbuffer[outputOfs + 3] = 0xFF; // opaque
         }
 
         private void Render()
