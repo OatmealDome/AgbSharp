@@ -630,14 +630,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             {
                 effectiveAddress = nReg;
             }
-
-            if (isWriteBack || !isPreIndex)
-            {
-                Reg(nRegNum) = address;
-            }
-
+             
             if (isLoad)
             {
+                if (isWriteBack || !isPreIndex)
+                {
+                    Reg(nRegNum) = address;
+                }
+
                 ref uint dReg = ref Reg(dRegNum);
 
                 if (isByte)
@@ -689,6 +689,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                     effectiveAddress &= 0xFFFFFFC;
                 
                     Cpu.MemoryMap.WriteU32(effectiveAddress, dReg);
+                }
+
+                if (isWriteBack || !isPreIndex)
+                {
+                    Reg(nRegNum) = address;
                 }
 
                 return 2; // 2N
