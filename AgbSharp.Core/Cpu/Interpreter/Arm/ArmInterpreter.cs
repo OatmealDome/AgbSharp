@@ -686,6 +686,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
                 else
                 {
+                    // Mask off the lower bits to force a word-aligned address
+                    effectiveAddress &= 0xFFFFFFC;
+                
                     Cpu.MemoryMap.WriteU32(effectiveAddress, dReg);
                 }
 
