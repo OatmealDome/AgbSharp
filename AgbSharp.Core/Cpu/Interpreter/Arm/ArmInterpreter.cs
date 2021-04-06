@@ -579,6 +579,20 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             return 1; // 1S
         }
 
+        private uint LoadWordFromAddress(uint address)
+        {
+            // More info on how LDR works with misaligned addresses here:
+            // https://www.keil.com/support/man/docs/ARMASM/armasm_dom1359731171041.htm
+
+            // Mask the lower 2 bits to force a word-aligned address
+            uint readValue = Cpu.MemoryMap.ReadU32(address & 0xFFFFFFFC);
+
+            // Rotate the read value depending how much the address is misaligned (if it even is)
+            int shift = BitUtil.GetBitRange(address, 0, 1) * 8;
+
+            return BitUtil.RotateRight(readValue, shift);
+        }
+
         private int LoadStoreOperation(uint instruction)
         {
             int nRegNum = BitUtil.GetBitRange(instruction, 16, 19);
@@ -646,16 +660,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
                 else
                 {
-                    // More info on how LDR works with misaligned addresses here:
-                    // https://www.keil.com/support/man/docs/ARMASM/armasm_dom1359731171041.htm
-
-                    // Mask the lower 2 bits to force a word-aligned address
-                    uint readValue = Cpu.MemoryMap.ReadU32(effectiveAddress & 0xFFFFFFFC);
-
-                    // Rotate the read value depending how much the address is misaligned (if it even is)
-                    int shift = BitUtil.GetBitRange(effectiveAddress, 0, 1) * 8;
-
-                    dReg = BitUtil.RotateRight(readValue, shift);
+                    dReg = LoadWordFromAddress(effectiveAddress);
                 }
 
                 if (dRegNum == PC)
@@ -866,9 +871,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             }
             else
             {
-                value = Cpu.MemoryMap.ReadU32(nReg);
+                value = LoadWordFromAddress(nReg);
 
-                Cpu.MemoryMap.WriteU32(nReg, mReg);
+                Cpu.MemoryMap.WriteU32(nReg & 0xFFFFFFFC, mReg);
             }
 
             dReg = value;
