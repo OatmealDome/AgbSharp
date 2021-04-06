@@ -646,17 +646,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
                 else
                 {
-                    // Check if aligned on a half-word boundary
-                    if (effectiveAddress % 4 != 0 && effectiveAddress % 2 == 0)
-                    {
-                        // Read the half-word at this address, but don't touch the higher bits
-                        // (on a real ARM CPU, they will be garbage).
-                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
-                    }
-                    else
-                    {
-                        dReg = Cpu.MemoryMap.ReadU32(effectiveAddress);
-                    }
+                    // Mask the lower 2 bits to force a word-aligned address
+                    uint readValue = Cpu.MemoryMap.ReadU32(effectiveAddress & 0xFFFFFFFC);
+
+                    // Rotate the read value depending how much the address is misaligned (if it even is)
+                    int shift = BitUtil.GetBitRange(effectiveAddress, 0, 1) * 8;
+
+                    dReg = BitUtil.RotateRight(readValue, shift);
                 }
 
                 if (dRegNum == PC)
