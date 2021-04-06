@@ -646,6 +646,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 }
                 else
                 {
+                    // More info on how LDR works with misaligned addresses here:
+                    // https://www.keil.com/support/man/docs/ARMASM/armasm_dom1359731171041.htm
+
                     // Mask the lower 2 bits to force a word-aligned address
                     uint readValue = Cpu.MemoryMap.ReadU32(effectiveAddress & 0xFFFFFFFC);
 
