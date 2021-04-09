@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using AgbSharp.Core.Cpu.Status;
 using AgbSharp.Core.Util;
 
@@ -256,39 +258,52 @@ namespace AgbSharp.Core.Cpu.Interpreter
         }
 
         //
-        // Data Block Transfer (STM / LDM) Helpers
+        // Data Block Transfer (LDM / STM) Helpers
         //
 
-        protected int PerformDataBlockTransfer(ref uint nReg, bool isPreIndex, bool isUp, bool isWriteBack, bool isLoad, bool useUserBank, uint regBitfield)
+        protected int PerformDataBlockTransfer(int nRegNum, bool isPreIndex, bool isUp, bool isWriteBack, bool isLoad, bool useUserBank, uint regBitfield)
         {
-            int transferredWords = 0;
+            // An empty register bitfield is a special case which is handled separately
+            
+            if (regBitfield == 0)
+            {
+                return PerformDataBlockTransferEmptyBitfield(ref Reg(nRegNum), isPreIndex, isUp, isWriteBack, isLoad, useUserBank);
+            }
+
+            ref uint nReg = ref Reg(nRegNum);
+            uint nRegInitial = nReg; // save for later in case its necessary
+
+            // Find all the registers to transfer
+
+            List<int> registersToTransfer = new List<int>();
 
             for (int i = 0; i < 16; i++)
             {
-                int regNum;
-
-                if (isPreIndex && !isUp)
+                if (BitUtil.IsBitSet(regBitfield, i))
                 {
-                    regNum = 15 - i;
+                    registersToTransfer.Add(i);
                 }
-                else
-                {
-                    regNum = i;
-                }
+            }
 
-                if (!BitUtil.IsBitSet(regBitfield, regNum))
-                {
-                    continue;
-                }
+            registersToTransfer.Sort();
 
+            // Find all the memory addresses to write those registers to
+
+            List<uint> adddresses = new List<uint>();
+
+            uint currentAddress = nReg;
+
+            for (int i = 0; i < registersToTransfer.Count; i++)
+            {
                 uint address;
+
                 if (isUp)
                 {
-                    address = nReg + 4;
+                    address = currentAddress + 4;
                 }
                 else
                 {
-                    address = nReg - 4;
+                    address = currentAddress - 4;
                 }
 
                 uint effectiveAddress;
@@ -298,12 +313,36 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 }
                 else
                 {
-                    effectiveAddress = nReg;
+                    effectiveAddress = currentAddress;
                 }
+
+                adddresses.Add(effectiveAddress);
+
+                currentAddress = address;
+            }
+
+            adddresses.Sort();
+
+            // Write back the final address if necessary
+
+            if (isWriteBack)
+            {
+                nReg = currentAddress;
+            }
+
+            // Write out the registers to the calculated addresses 
+
+            Dictionary<int, uint> zippedDict = registersToTransfer.Zip(adddresses, (k, v) => new { k, v })
+                                                .ToDictionary(x => x.k, x => x.v);
+
+            for (int i = 0; i < registersToTransfer.Count; i++)
+            {
+                int regNum = registersToTransfer[i];
+                uint regAddress = adddresses[i];
 
                 if (isLoad)
                 {
-                    uint value = Cpu.MemoryMap.ReadU32(effectiveAddress);
+                    uint value = Cpu.MemoryMap.ReadU32(regAddress);
 
                     if (useUserBank)
                     {
@@ -316,25 +355,125 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 }
                 else
                 {
-                    if (useUserBank)
+                    uint regValue;
+
+                    if (regNum == nRegNum)
                     {
-                        Cpu.MemoryMap.WriteU32(effectiveAddress, Cpu.RegUser(regNum));
+                        // If the base register is in the register bitfield in an STM, weird things happen.
+                        // If the first register transferred is the base register, the initial value is
+                        // written back, which will overwrite the write-back address (if it was enabled).
+                        // Otherwise, the last address in the list of addresses is written to the register.
+                        if (registersToTransfer[0] != nRegNum)
+                        {
+                            regValue = currentAddress;
+                        }
+                        else
+                        {
+                            regValue = nRegInitial;
+                        }
                     }
                     else
                     {
-                        Cpu.MemoryMap.WriteU32(effectiveAddress, Reg(regNum));
+                        if (useUserBank)
+                        {
+                            regValue = Cpu.RegUser(regNum);
+                        }
+                        else
+                        {
+                            regValue = Reg(regNum);
+                        }
+
+                        if (regNum == PC)
+                        {
+                            regValue += 8;
+                        }
                     }
-                }
 
-                if (isWriteBack || !isPreIndex)
-                {
-                    nReg = address;
+                    Cpu.MemoryMap.WriteU32(regAddress, regValue);
                 }
-
-                transferredWords++;
             }
 
-            return transferredWords;
+            return registersToTransfer.Count;
+        }
+
+        protected int PerformDataBlockTransferEmptyBitfield(ref uint nReg, bool isPreIndex, bool isUp, bool isWriteBack, bool isLoad, bool useUserBank)
+        {
+            // TODO: Is this behaviour even correct?
+            // It matches what the 5xx series of ARM tests from gba-tests expects, so maybe it really is?
+
+            // When LDM / STM have no registers specified in the bitfield, PC will be loaded / stored
+            // and the written back address (if any) will be nReg +/- 0x40. The effective address where
+            // PC is loaded / stored depends on the values of the increment flag and the pre-index flag.
+
+            uint effectiveAddress;
+
+            if (isUp)
+            {
+                if (isPreIndex)
+                {
+                    effectiveAddress = nReg + 0x4;
+                }
+                else
+                {
+                    effectiveAddress = nReg;
+                }
+            }
+            else
+            {
+                if (isPreIndex)
+                {
+                    effectiveAddress = nReg - 0x40;
+                }
+                else
+                {
+                    effectiveAddress = nReg - 0x3c;
+                }
+            }
+
+            uint regValue;
+
+            if (isLoad)
+            {
+                regValue = Cpu.MemoryMap.ReadU32(effectiveAddress);
+
+                if (useUserBank)
+                {
+                    Cpu.RegUser(PC) = regValue;
+                }
+                else
+                {
+                    Reg(PC) = regValue;
+                }
+            }
+            else
+            {
+                if (useUserBank)
+                {
+                    regValue = Cpu.RegUser(PC);
+                }
+                else
+                {
+                    regValue = Reg(PC);
+                }
+
+                regValue += 0x8;
+
+                Cpu.MemoryMap.WriteU32(effectiveAddress, regValue);
+            }
+
+            if (isWriteBack)
+            {
+                if (isUp)
+                {
+                    nReg += 0x40;
+                }
+                else
+                {
+                    nReg -= 0x40;
+                }
+            }
+
+            return 1;
         }
 
         //

@@ -814,7 +814,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
         private int BlockDataTransferOperation(uint instruction)
         {
             int nRegNum = BitUtil.GetBitRange(instruction, 16, 19);
-            ref uint nReg = ref Reg(nRegNum);
 
             bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
             bool isUp = BitUtil.IsBitSet(instruction, 23);
@@ -838,7 +837,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             uint bitfield = instruction & 0xFFFF;
 
-            int transferredWords = PerformDataBlockTransfer(ref nReg, isPreIndex, isUp, isWriteBack, isLoad, useUserBank, bitfield);
+            int transferredWords = PerformDataBlockTransfer(nRegNum, isPreIndex, isUp, isWriteBack, isLoad, useUserBank, bitfield);
 
             if (isLoad)
             {

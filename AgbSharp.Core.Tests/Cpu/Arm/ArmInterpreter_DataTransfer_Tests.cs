@@ -60,7 +60,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0xCCCCCCCC, cpu.MemoryMap.ReadU32(targetAddress + (11 * 4)));
             Assert.Equal((uint)0xDDDDDDDD, cpu.MemoryMap.ReadU32(targetAddress + (12 * 4)));
             Assert.Equal((uint)0xEEEEEEEE, cpu.MemoryMap.ReadU32(targetAddress + (13 * 4)));
-            Assert.Equal(InternalWramRegion.REGION_START + 4, cpu.MemoryMap.ReadU32(targetAddress + (14 * 4)));
+            Assert.Equal(InternalWramRegion.REGION_START + 12, cpu.MemoryMap.ReadU32(targetAddress + (14 * 4)));
         }
 
         [Fact]
@@ -124,9 +124,9 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             }, true);
 
             Assert.Equal((uint)targetAddress - 0xC, cpu.CurrentRegisterSet.GetRegister(0));
-            Assert.Equal((uint)0x11111111, cpu.MemoryMap.ReadU32(targetAddress - (0 * 4)));
+            Assert.Equal((uint)0x77777777, cpu.MemoryMap.ReadU32(targetAddress - (0 * 4)));
             Assert.Equal((uint)0x55555555, cpu.MemoryMap.ReadU32(targetAddress - (1 * 4)));
-            Assert.Equal((uint)0x77777777, cpu.MemoryMap.ReadU32(targetAddress - (2 * 4)));
+            Assert.Equal((uint)0x11111111, cpu.MemoryMap.ReadU32(targetAddress - (2 * 4)));
         }
 
         [Fact]
@@ -253,9 +253,9 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             AgbCpu cpu = CpuUtil.CreateCpu();
 
-            cpu.MemoryMap.WriteU32(targetAddress - (0 * 4), 0x11111111);
+            cpu.MemoryMap.WriteU32(targetAddress - (0 * 4), 0x77777777);
             cpu.MemoryMap.WriteU32(targetAddress - (1 * 4), 0x55555555);
-            cpu.MemoryMap.WriteU32(targetAddress - (2 * 4), 0x77777777);
+            cpu.MemoryMap.WriteU32(targetAddress - (2 * 4), 0x11111111);
 
             cpu.CurrentRegisterSet.GetRegister(0) = targetAddress;
 

@@ -650,7 +650,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 BitUtil.SetBit(ref bitfield, LR);
             }
 
-            int transferredWords = PerformDataBlockTransfer(ref Reg(SP), true, false, true, false, false, bitfield);
+            int transferredWords = PerformDataBlockTransfer(SP, true, false, true, false, false, bitfield);
 
             return (transferredWords - 1) + 2; // (n - 1)S + 2N
         }
@@ -665,7 +665,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 BitUtil.SetBit(ref bitfield, PC);
             }
 
-            int transferredWords = PerformDataBlockTransfer(ref Reg(SP), false, true, true, true, false, bitfield);
+            int transferredWords = PerformDataBlockTransfer(SP, false, true, true, true, false, bitfield);
 
             if (popPc)
             {
@@ -679,13 +679,13 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
         private int FormFifteenBlockTransfer(uint instruction)
         {
-            ref uint bReg = ref Reg(BitUtil.GetBitRange(instruction, 8, 10));
+            int bRegNum = BitUtil.GetBitRange(instruction, 8, 10);
 
             uint bitfield = instruction & 0xFF;
 
             bool isLoad = BitUtil.IsBitSet(instruction, 11);
 
-            int transferredWords = PerformDataBlockTransfer(ref bReg, false, true, true, isLoad, false, bitfield);
+            int transferredWords = PerformDataBlockTransfer(bRegNum, false, true, true, isLoad, false, bitfield);
 
             if (isLoad)
             {
