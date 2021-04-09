@@ -326,5 +326,37 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0xEEEEEEEE, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
         }
 
+        [Fact]
+        public void StmibLdmda_StoreThreeRegisters_RegistersCorrect()
+        {
+            const uint targetAddress = InternalWramRegion.REGION_START + 0x1000;
+
+            AgbCpu cpu = CpuUtil.CreateCpu();
+
+            FillRegistersWithDummyData(cpu);
+
+            cpu.CurrentRegisterSet.GetRegister(0) = targetAddress;
+
+            CpuUtil.RunCpu(cpu, new uint[]
+            {
+                0xA200A0E9 // STMIB r0!, {r1, r5, r7}
+            }, true);
+
+            Assert.Equal((uint)targetAddress + 0xC, cpu.CurrentRegisterSet.GetRegister(0));
+            Assert.Equal((uint)0x11111111, cpu.MemoryMap.ReadU32(targetAddress + (1 * 4)));
+            Assert.Equal((uint)0x55555555, cpu.MemoryMap.ReadU32(targetAddress + (2 * 4)));
+            Assert.Equal((uint)0x77777777, cpu.MemoryMap.ReadU32(targetAddress + (3 * 4)));
+
+            CpuUtil.RunCpu(cpu, new uint[]
+            {
+                0xA20030E8 // LDMDA r0!, {r1, r5, r7}
+            }, true);
+
+            Assert.Equal((uint)targetAddress, cpu.CurrentRegisterSet.GetRegister(0));
+            Assert.Equal((uint)0x11111111, cpu.CurrentRegisterSet.GetRegister(1));
+            Assert.Equal((uint)0x55555555, cpu.CurrentRegisterSet.GetRegister(5));
+            Assert.Equal((uint)0x77777777, cpu.CurrentRegisterSet.GetRegister(7));
+        }
+
     }
 }
