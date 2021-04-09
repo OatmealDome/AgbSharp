@@ -824,13 +824,16 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
             bool useUserBank = false;
 
-            if (sFlag && isLoad && BitUtil.IsBitSet(instruction, PC))
+            if (sFlag)
             {
-                CurrentStatus.RegisterValue = SavedStatus.RegisterValue;
-            }
-            else
-            {
-                useUserBank = true;
+                if (isLoad && BitUtil.IsBitSet(instruction, PC))
+                {
+                    CurrentStatus.RegisterValue = SavedStatus.RegisterValue;
+                }
+                else
+                {
+                    useUserBank = true;
+                }
             }
 
             uint bitfield = instruction & 0xFFFF;
