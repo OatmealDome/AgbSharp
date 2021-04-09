@@ -158,7 +158,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
                 0x000091E5 // LDR r0, [r1]
             }, true);
 
-            Assert.Equal((uint)0x0000BABE, cpu.CurrentRegisterSet.GetRegister(0));
+            Assert.Equal((uint)0x0000BABE, cpu.CurrentRegisterSet.GetRegister(0) & 0xFFFF);
             Assert.Equal(targetAddress, cpu.CurrentRegisterSet.GetRegister(1));
         }
 
