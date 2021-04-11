@@ -388,7 +388,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     uint newPc;
                     if (sRegNum == PC)
                     {
-                        newPc = (uint)((Reg(PC) + 2) & ~2);
+                        newPc = (uint)(sReg & ~2);
 
                         CurrentStatus.Thumb = false;
                     }
