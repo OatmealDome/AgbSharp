@@ -391,6 +391,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     uint result = firstOperand - sReg;
 
                     SetCarryAndOverflowOnSubtraction(firstOperand, sReg, result, false);
+
+                    CurrentStatus.Zero = result == 0;
+                    CurrentStatus.Negative = BitUtil.IsBitSet(result, 31);
                     
                     break;
                 case 0b10:
