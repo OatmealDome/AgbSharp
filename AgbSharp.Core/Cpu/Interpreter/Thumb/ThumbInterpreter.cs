@@ -374,11 +374,23 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     // GBATEK says that this operation does not affect CPSR
                     dReg = dReg + sReg;
 
+                    if (dRegNum == PC)
+                    {
+                        dReg += 2;
+                    }
+
                     break;
                 case 0b01: // CMP
-                    uint result = dReg - sReg;
+                    uint firstOperand = dReg;
 
-                    SetCarryAndOverflowOnSubtraction(dReg, sReg, result, false);
+                    if (dRegNum == PC)
+                    {
+                        firstOperand += 2;
+                    }
+
+                    uint result = firstOperand - sReg;
+
+                    SetCarryAndOverflowOnSubtraction(firstOperand, sReg, result, false);
                     
                     break;
                 case 0b10:
