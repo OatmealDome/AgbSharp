@@ -827,22 +827,31 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
         private int FormNineteenLoadHiBits(uint instruction)
         {
-            uint hiBits = (uint)BitUtil.GetBitRange(instruction, 0, 10);;
+            uint hiBits = (uint)BitUtil.GetBitRange(instruction, 0, 10) << 12;
 
-            Reg(LR) = Reg(PC) + 2 + (hiBits << 12);
+            // Sign-extend if negative
+            if (BitUtil.IsBitSet(hiBits, 22))
+            {
+                hiBits |= 0xFF800000;
+            }
+            
+            Reg(LR) = Reg(PC) + 2 + hiBits;
 
             return 1; // 1S
         }
 
         private int FormNineteenExecuteBranch(uint instruction)
         {
-            uint loBits = (uint)BitUtil.GetBitRange(instruction, 0, 10);
+            uint loBits = (uint)BitUtil.GetBitRange(instruction, 0, 10) << 1;
 
-            uint newLr = Reg(PC);
+            ref uint pc = ref Reg(PC);
+            ref uint lr = ref Reg(LR);
 
-            Reg(PC) = Reg(LR) + (loBits << 1);
+            uint newLr = pc;
 
-            Reg(LR) = newLr;
+            pc = lr + loBits;
+
+            lr = newLr;
 
             return 2 + 1; // 2S + 1N
         }
