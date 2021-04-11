@@ -411,6 +411,11 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     break;
             }
 
+            if (dRegNum == PC)
+            {
+                dReg = dReg & 0xFFFFFFFE;
+            }
+
             if (opcode == 0b01)
             {
                 return 1; // 1S
