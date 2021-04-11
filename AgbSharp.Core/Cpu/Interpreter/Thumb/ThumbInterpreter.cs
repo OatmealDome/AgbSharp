@@ -259,19 +259,25 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     result = dReg ^ sReg;
                     break;
                 case 0b0010:
-                    result = PerformShift(ShiftType.LogicalLeft, dReg, (int)(sReg & 0xFF), false, true);
+                    int lslShift = (int)(sReg & 0xFF);
+
+                    result = PerformShift(ShiftType.LogicalLeft, dReg, lslShift, false, lslShift != 0);
 
                     m = 1;
 
                     break;
                 case 0b0011:
-                    result = PerformShift(ShiftType.LogicalRight, dReg, (int)(sReg & 0xFF), false, true);
+                    int lsrShift = (int)(sReg & 0xFF);
+
+                    result = PerformShift(ShiftType.LogicalRight, dReg, lsrShift, false, lsrShift != 0);
 
                     m = 1;
 
                     break;
                 case 0b0100:
-                    result = PerformShift(ShiftType.ArithmaticRight, dReg, (int)(sReg & 0xFF), false, true);
+                    int asrShift = (int)(sReg & 0xFF);
+
+                    result = PerformShift(ShiftType.ArithmaticRight, dReg, asrShift, false, asrShift != 0);
 
                     m = 1;
 
@@ -289,7 +295,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                     break;
                 case 0b0111:
-                    result = PerformShift(ShiftType.RotateRight, dReg, (int)(sReg & 0xFF), false, true);
+                    int rorShift = (int)(sReg & 0xFF);
+
+                    result = PerformShift(ShiftType.RotateRight, dReg, rorShift, false, rorShift != 0);
                     
                     m = 1;
 
