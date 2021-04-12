@@ -1,4 +1,5 @@
 using System;
+using AgbSharp.Core.Controller;
 using AgbSharp.Core.Cpu;
 using AgbSharp.Core.Memory;
 using AgbSharp.Core.Memory.Bios;
@@ -28,6 +29,12 @@ namespace AgbSharp.Core
             private set;
         }
 
+        public AgbController Controller
+        {
+            get;
+            private set;
+        }
+
         // POSTFLG
         private byte PostBootFlag;  // 1 = Not first boot
 
@@ -41,6 +48,7 @@ namespace AgbSharp.Core
             MemoryMap = new AgbMemoryMap();
             Cpu = new AgbCpu(MemoryMap);
             Ppu = new AgbPpu(MemoryMap, Cpu);
+            Controller = new AgbController(MemoryMap, Cpu);
 
             MemoryMap.RegisterRegion(new InternalWramRegion());
             MemoryMap.RegisterRegion(new ExternalWramRegion());
