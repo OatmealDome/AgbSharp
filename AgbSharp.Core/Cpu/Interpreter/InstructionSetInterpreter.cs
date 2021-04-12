@@ -350,9 +350,6 @@ namespace AgbSharp.Core.Cpu.Interpreter
 
             // Write out the registers to the calculated addresses 
 
-            Dictionary<int, uint> zippedDict = registersToTransfer.Zip(adddresses, (k, v) => new { k, v })
-                                                .ToDictionary(x => x.k, x => x.v);
-
             for (int i = 0; i < registersToTransfer.Count; i++)
             {
                 int regNum = registersToTransfer[i];
