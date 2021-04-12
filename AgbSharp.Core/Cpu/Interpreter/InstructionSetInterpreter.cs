@@ -258,6 +258,24 @@ namespace AgbSharp.Core.Cpu.Interpreter
         }
 
         //
+        // Load / Store Helpers
+        //
+
+        protected uint LoadWordFromAddress(uint address)
+        {
+            // More info on how LDR works with misaligned addresses here:
+            // https://www.keil.com/support/man/docs/ARMASM/armasm_dom1359731171041.htm
+
+            // Mask the lower 2 bits to force a word-aligned address
+            uint readValue = Cpu.MemoryMap.ReadU32(address & 0xFFFFFFFC);
+
+            // Rotate the read value depending how much the address is misaligned (if it even is)
+            int shift = BitUtil.GetBitRange(address, 0, 1) * 8;
+
+            return BitUtil.RotateRight(readValue, shift);
+        }
+
+        //
         // Data Block Transfer (LDM / STM) Helpers
         //
 
