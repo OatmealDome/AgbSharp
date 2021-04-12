@@ -456,7 +456,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
             int offset = BitUtil.GetBitRange(instruction, 0, 7) * 4;
 
-            dReg = Cpu.MemoryMap.ReadU32(pc + (uint)offset);
+            dReg = LoadWordFromAddress(pc + (uint)offset);
 
             return 1 + 1 + 1; // 1S + 1N + 1I
         }
@@ -521,7 +521,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                         Cpu.MemoryMap.Write(address, (byte)(dReg & 0xFF));
                         break;
                     case 0b10: // LDR
-                        dReg = Cpu.MemoryMap.ReadU32(address);
+                        dReg = LoadWordFromAddress(address);
 
                         isLoad = true;
 
@@ -561,7 +561,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                     Cpu.MemoryMap.WriteU32(bReg + (offset * 4), dReg);
                     break;
                 case 0b01: // LDR
-                    dReg = Cpu.MemoryMap.ReadU32(bReg + (offset * 4));
+                    dReg = LoadWordFromAddress(bReg + (offset * 4));
 
                     isLoad = true;
 
@@ -618,7 +618,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
             if (BitUtil.IsBitSet(instruction, 11))
             {
-                dReg = Cpu.MemoryMap.ReadU32(address);
+                dReg = LoadWordFromAddress(address);
 
                 return 1 + 1 + 1; // 1S + 1N + 1I
             }
