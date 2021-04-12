@@ -403,7 +403,14 @@ namespace AgbSharp.Core.Cpu.Interpreter
 
                         if (regNum == PC)
                         {
-                            regValue += 8;
+                            if (CurrentStatus.Thumb)
+                            {
+                                regValue += 0x4;
+                            }
+                            else
+                            {
+                                regValue += 0x8;
+                            }
                         }
                     }
 
@@ -474,7 +481,14 @@ namespace AgbSharp.Core.Cpu.Interpreter
                     regValue = Reg(PC);
                 }
 
-                regValue += 0x8;
+                if (CurrentStatus.Thumb)
+                {
+                    regValue += 0x4;
+                }
+                else
+                {
+                    regValue += 0x8;
+                }
 
                 Cpu.MemoryMap.WriteU32(effectiveAddress, regValue);
             }
