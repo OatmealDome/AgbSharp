@@ -847,7 +847,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
             ref uint pc = ref Reg(PC);
             ref uint lr = ref Reg(LR);
 
-            uint newLr = pc;
+            uint newLr = pc | 1;
 
             pc = lr + loBits;
 
