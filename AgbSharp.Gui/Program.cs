@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -7,6 +7,7 @@ using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using AgbSharp.Core;
 using System.IO;
+using AgbSharp.Core.Controller;
 
 namespace GbSharp.Gui
 {
@@ -66,6 +67,44 @@ namespace GbSharp.Gui
 #endif
                 
                 Sdl2Events.ProcessEvents();
+
+                InputSnapshot snapshot = window.PumpEvents();
+                foreach (KeyEvent keyEvent in snapshot.KeyEvents)
+                {
+                    switch (keyEvent.Key)
+                    {
+                        case Key.W:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Up, keyEvent.Down);
+                            break;
+                        case Key.S:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Down, keyEvent.Down);
+                            break;
+                        case Key.A:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Left, keyEvent.Down);
+                            break;
+                        case Key.D:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Right, keyEvent.Down);
+                            break;
+                        case Key.Minus:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Select, keyEvent.Down);
+                            break;
+                        case Key.Plus:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.Start, keyEvent.Down);
+                            break;
+                        case Key.Comma:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.B, keyEvent.Down);
+                            break;
+                        case Key.Period:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.A, keyEvent.Down);
+                            break;
+                        case Key.K:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.L, keyEvent.Down);
+                            break;
+                        case Key.L:
+                            agbDevice.Controller.UpdateKeyState(ControllerKey.R, keyEvent.Down);
+                            break;
+                    }
+                }
 
                 renderer.Draw(agbDevice.Ppu.Framebuffer);
 
