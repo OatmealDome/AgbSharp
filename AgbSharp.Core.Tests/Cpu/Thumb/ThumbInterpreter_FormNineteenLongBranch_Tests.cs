@@ -31,7 +31,7 @@ namespace AgbSharp.Core.Tests.Cpu.Thumb
                 0xF800
             }, true);
 
-            Assert.Equal(InternalWramRegion.REGION_START + 0x2, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
+            Assert.Equal(InternalWramRegion.REGION_START + 0x2 + 0x1, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
             Assert.Equal(0xDEADBEEF, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC));
         }
 
@@ -48,7 +48,7 @@ namespace AgbSharp.Core.Tests.Cpu.Thumb
                 0xFBFF
             }, true);
 
-            Assert.Equal(InternalWramRegion.REGION_START + 0x4, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
+            Assert.Equal(InternalWramRegion.REGION_START + 0x4 + 0x1, cpu.CurrentRegisterSet.GetRegister(CpuUtil.LR));
             Assert.Equal((uint)0x33FF802, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC)); // TODO: is this correct?
         }
 
