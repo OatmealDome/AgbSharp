@@ -362,6 +362,18 @@ namespace AgbSharp.Core.Cpu.Interpreter
                 {
                     uint value = Cpu.MemoryMap.ReadU32(regAddress);
 
+                    if (regNum == PC)
+                    {
+                        if (CurrentStatus.Thumb)
+                        {
+                            value &= 0xFFFFFFFE;
+                        }
+                        else
+                        {
+                            value &= 0xFFFFFFFC;
+                        }
+                    }
+
                     if (useUserBank)
                     {
                         Cpu.RegUser(regNum) = value;
@@ -460,6 +472,15 @@ namespace AgbSharp.Core.Cpu.Interpreter
             if (isLoad)
             {
                 regValue = Cpu.MemoryMap.ReadU32(effectiveAddress);
+
+                if (CurrentStatus.Thumb)
+                {
+                    regValue &= 0xFFFFFFFE;
+                }
+                else
+                {
+                    regValue &= 0xFFFFFFFC;
+                }
 
                 if (useUserBank)
                 {
