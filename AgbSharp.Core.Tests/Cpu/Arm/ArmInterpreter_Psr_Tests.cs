@@ -85,7 +85,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
 
             CpuUtil.RunCpu(cpu, new uint[]
             {
-                0xE329F20F // MSR CPSR, #0xF0000000
+                0xE328F20F // MSR CPSR, #0xF0000000
             });
 
             Assert.True(cpu.CurrentStatus.Negative);
