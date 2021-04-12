@@ -72,7 +72,7 @@ namespace AgbSharp.Core.Tests.Cpu.Thumb
             Assert.Equal((uint)0x11111111, cpu.CurrentRegisterSet.GetRegister(1));
             Assert.Equal((uint)0x55555555, cpu.CurrentRegisterSet.GetRegister(5));
             Assert.Equal((uint)0x77777777, cpu.CurrentRegisterSet.GetRegister(7));
-            Assert.Equal((uint)0xFFFFFFFF, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC));
+            Assert.Equal((uint)0xFFFFFFFE, cpu.CurrentRegisterSet.GetRegister(CpuUtil.PC));
         }
 
     }

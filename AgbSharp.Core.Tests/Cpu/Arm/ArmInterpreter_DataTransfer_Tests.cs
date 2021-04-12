@@ -195,7 +195,7 @@ namespace AgbSharp.Core.Tests.Cpu.Arm
             Assert.Equal((uint)0xCCCCCCCC, cpu.CurrentRegisterSet.GetRegister(12));
             Assert.Equal((uint)0xDDDDDDDD, cpu.CurrentRegisterSet.GetRegister(13));
             Assert.Equal((uint)0xEEEEEEEE, cpu.CurrentRegisterSet.GetRegister(14));
-            Assert.Equal((uint)0xFFFFFFFF, cpu.CurrentRegisterSet.GetRegister(15));
+            Assert.Equal((uint)0xFFFFFFFC, cpu.CurrentRegisterSet.GetRegister(15));
         }
 
         [Fact]
