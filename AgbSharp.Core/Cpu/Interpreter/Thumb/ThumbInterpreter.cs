@@ -478,7 +478,8 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
                 switch (opcode)
                 {
                     case 0b00: // STRH
-                        Cpu.MemoryMap.WriteU16(address, (ushort)(dReg & 0xFFFF));
+                        // Mask bit 0 to force an aligned write
+                        Cpu.MemoryMap.WriteU16(address & 0xFFFFFFFE, (ushort)(dReg & 0xFFFF));
                         break;
                     case 0b01: // LDSB
                         dReg = Cpu.MemoryMap.Read(address);
@@ -492,17 +493,29 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
                         break;
                     case 0b10: // LDRH
-                        dReg = Cpu.MemoryMap.ReadU16(address);
+                        dReg = LoadHalfWordFromAddress(address);
 
                         isLoad = true;
 
                         break;
                     case 0b11: // LDSH
-                        dReg = Cpu.MemoryMap.ReadU16(address);
+                        dReg = LoadHalfWordFromAddress(address);
 
-                        if (BitUtil.IsBitSet(dReg, 15))
+                        if (address % 2 != 0)
                         {
-                            dReg |= 0xFFFF0000;
+                            // Sign extend based on bit 7 if unaligned
+                            // https://github.com/mgba-emu/mgba/commit/4bd7a65432c97b8909833f72b6428cfacea65b41
+                            if (BitUtil.IsBitSet(dReg, 7))
+                            {
+                                dReg |= 0xFFFFFF00;
+                            }
+                        }
+                        else
+                        {
+                            if (BitUtil.IsBitSet(dReg, 15))
+                            {
+                                dReg |= 0xFFFF0000;
+                            }
                         }
 
                         isLoad = true;
@@ -597,13 +610,14 @@ namespace AgbSharp.Core.Cpu.Interpreter.Thumb
 
             if (BitUtil.IsBitSet(instruction, 11))
             {
-                dReg = Cpu.MemoryMap.ReadU16(address);
+                dReg = LoadHalfWordFromAddress(address);
 
                 return 1 + 1 + 1; // 1S + 1N + 1I
             }
             else
             {
-                Cpu.MemoryMap.WriteU16(address, (ushort)(dReg & 0xFFFF));
+                // Mask bit 0 to force an aligned write
+                Cpu.MemoryMap.WriteU16(address & 0xFFFFFFFE, (ushort)(dReg & 0xFFFF));
 
                 return 2; // 2S
             }
