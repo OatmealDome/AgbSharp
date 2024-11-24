@@ -366,3 +366,6 @@ launchSettings.json
 
 # Visual Studio Code
 .vscode
+
+# JetBrains IDEs
+.idea
