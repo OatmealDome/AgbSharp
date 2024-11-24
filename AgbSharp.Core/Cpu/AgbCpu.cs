@@ -141,14 +141,26 @@ namespace AgbSharp.Core.Cpu
         // Step the CPU by one instruction and return the cycles it took to execute
         public int Step()
         {
+            int cycles;
+
             if (CurrentStatus.Thumb)
             {
-                return ThumbInterpreter.Step();
+                cycles = ThumbInterpreter.Step();
             }
             else
             {
-                return ArmInterpreter.Step();
+                cycles = ArmInterpreter.Step();
             }
+            
+            CpuMode afterStepMode = CurrentStatus.Mode;
+
+            if (afterStepMode == CpuMode.OldUser || afterStepMode == CpuMode.OldFastIrq ||
+                afterStepMode == CpuMode.OldIrq || afterStepMode == CpuMode.OldSupervisor)
+            {
+                throw new AgbException($"CPU was switched into invalid mode {afterStepMode}");
+            }
+
+            return cycles;
         }
 
         public void RaiseInterrupt(InterruptType type)
