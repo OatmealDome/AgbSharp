@@ -275,6 +275,21 @@ namespace AgbSharp.Core.Cpu.Interpreter
             return BitUtil.RotateRight(readValue, shift);
         }
 
+        protected uint LoadHalfWordFromAddress(uint address)
+        {
+            // Mask bit 0 to force a half-word-aligned address
+            uint readValue = Cpu.MemoryMap.ReadU16(address & 0xFFFFFFFE);
+            
+            // ROR 8 the register if the load was unaligned
+            // https://github.com/jsmolka/gba-tests/blob/master/arm/halfword_transfer.asm#L127-L139
+            if (address % 2 != 0)
+            {
+                readValue = BitUtil.RotateRight(readValue, 8);
+            }
+
+            return readValue;
+        }
+
         //
         // Data Block Transfer (LDM / STM) Helpers
         //

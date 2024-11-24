@@ -749,7 +749,7 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
                 switch (opType)
                 {
                     case 0b01:
-                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
+                        dReg = LoadHalfWordFromAddress(effectiveAddress);
                         break;
                     case 0b10:
                         dReg = Cpu.MemoryMap.Read(effectiveAddress);
@@ -761,11 +761,23 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
 
                         break;
                     case 0b11:
-                        dReg = Cpu.MemoryMap.ReadU16(effectiveAddress);
-
-                        if (BitUtil.IsBitSet(dReg, 15))
+                        dReg = LoadHalfWordFromAddress(effectiveAddress);
+                        
+                        if (effectiveAddress % 2 != 0)
                         {
-                            dReg |= 0xFFFF0000;
+                            // Sign extend based on bit 7 if unaligned
+                            // https://github.com/mgba-emu/mgba/commit/4bd7a65432c97b8909833f72b6428cfacea65b41
+                            if (BitUtil.IsBitSet(dReg, 7))
+                            {
+                                dReg |= 0xFFFFFF00;
+                            }
+                        }
+                        else
+                        {
+                            if (BitUtil.IsBitSet(dReg, 15))
+                            {
+                                dReg |= 0xFFFF0000;
+                            }
                         }
 
                         break;
@@ -783,6 +795,9 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             else
             {
                 InterpreterAssert(opType == 0b01, "LDRD/STRD not implemented");
+
+                // Mask bit 0 in case the address is unaligned
+                effectiveAddress &= 0xFFFFFFFE;
 
                 Cpu.MemoryMap.WriteU16(effectiveAddress, (ushort)dReg);
 
