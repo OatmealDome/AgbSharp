@@ -698,8 +698,6 @@ namespace AgbSharp.Core.Cpu.Interpreter.Arm
             int dRegNum = BitUtil.GetBitRange(instruction, 12, 15);
             ref uint dReg = ref Reg(dRegNum);
 
-
-            bool isImmediateOffset = !BitUtil.IsBitSet(instruction, 25);
             bool isPreIndex = BitUtil.IsBitSet(instruction, 24);
             bool isUp = BitUtil.IsBitSet(instruction, 23);
             bool isWriteBack = BitUtil.IsBitSet(instruction, 21);
